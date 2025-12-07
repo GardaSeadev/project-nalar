@@ -36,6 +36,9 @@ dist-ssr
 # Kiro AI assistant files (optional - keep if you want to share specs)
 .kiro/
 
+# Internal documentation (not for public)
+DOCS_FOR_INTERNAL/
+
 # Test coverage
 coverage
 *.lcov

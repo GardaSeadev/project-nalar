@@ -20,6 +20,7 @@ A modern, gamified quiz interface for Academic Potential Tests (TPA/CPNS) built 
 - **Vite** - Build tool and dev server
 - **Tailwind CSS** - Styling
 - **Lucide React** - Icons
+- **Supabase** - Database and backend (optional)
 - **Vitest** - Testing framework
 - **fast-check** - Property-based testing
 - **React Testing Library** - Component testing
@@ -50,12 +51,14 @@ npm run dev
 ### Available Scripts
 
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run test         # Run tests once
-npm run test:watch   # Run tests in watch mode
-npm run lint         # Run ESLint
+npm run dev              # Start development server
+npm run build            # Build for production
+npm run preview          # Preview production build
+npm run test             # Run tests once
+npm run test:watch       # Run tests in watch mode
+npm run lint             # Run ESLint
+npm run generate:sql     # Generate SQL from TypeScript questions
+npm run generate:sql:csv # Generate SQL from CSV file
 ```
 
 ## Project Structure
@@ -87,6 +90,25 @@ Run tests with:
 npm test
 ```
 
+## Database Setup (Optional)
+
+This project supports both hardcoded questions and Supabase database.
+
+### Using Supabase (Recommended for 100+ questions)
+
+**Benefits:**
+- Add/edit questions without code changes
+- Scale to 100+ questions easily
+- Free tier supports thousands of questions
+- Automatic fallback to mock data
+
+### Using Mock Data (Default)
+
+Questions are hardcoded in `src/mockData.ts`. Perfect for:
+- Development and testing
+- Small question sets (< 20 questions)
+- Offline usage
+
 ## Deployment
 
 ### Deploy to Vercel
@@ -94,7 +116,10 @@ npm test
 1. Push your code to GitHub
 2. Import your repository in [Vercel](https://vercel.com)
 3. Vercel will auto-detect Vite and configure build settings
-4. Deploy!
+4. Add environment variables (if using Supabase):
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+5. Deploy!
 
 Build settings (auto-detected):
 - **Build Command**: `npm run build`

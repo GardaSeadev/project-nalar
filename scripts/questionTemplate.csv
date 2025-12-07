@@ -1,0 +1,4 @@
+type,difficulty,question,optionA,optionB,optionC,optionD,optionE,correctId,explanation
+Logika Aritmatika,Easy,Jika 2x + 5 = 15 maka nilai x adalah?,3,5,7,10,15,B,2x + 5 = 15 maka 2x = 10 sehingga x = 5
+Deret Angka,Medium,Tentukan angka berikutnya: 3 6 9 12 ?,13,14,15,16,18,C,Deret aritmatika dengan beda 3. Jadi 12 + 3 = 15
+Penalaran Verbal,Hard,Semua A adalah B. Tidak ada B yang C. Kesimpulan?,Semua A adalah C,Tidak ada A yang C,Beberapa A adalah C,Semua C adalah A,Tidak dapat ditentukan,B,Jika semua A adalah B dan tidak ada B yang C maka tidak ada A yang C
