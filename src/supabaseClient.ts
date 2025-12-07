@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { QuestionData } from './types';
 
 // Replace these with your actual Supabase project credentials
@@ -6,12 +6,23 @@ import type { QuestionData } from './types';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Only create client if credentials are provided
+let supabase: SupabaseClient | null = null;
+
+if (supabaseUrl && supabaseAnonKey) {
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
+}
+
+export { supabase };
 
 /**
  * Fetch all questions from Supabase
  */
 export async function fetchQuestions(): Promise<QuestionData[]> {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+  }
+
   const { data, error } = await supabase
     .from('questions')
     .select('*')
@@ -29,6 +40,10 @@ export async function fetchQuestions(): Promise<QuestionData[]> {
  * Fetch a random subset of questions
  */
 export async function fetchRandomQuestions(count: number = 10): Promise<QuestionData[]> {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+  }
+
   const { data, error } = await supabase
     .from('questions')
     .select('*');
