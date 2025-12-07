@@ -1,4 +1,31 @@
 type,difficulty,question,optionA,optionB,optionC,optionD,optionE,correctId,explanation
-Logika Aritmatika,Easy,Jika 2x + 5 = 15 maka nilai x adalah?,3,5,7,10,15,B,2x + 5 = 15 maka 2x = 10 sehingga x = 5
-Deret Angka,Medium,Tentukan angka berikutnya: 3 6 9 12 ?,13,14,15,16,18,C,Deret aritmatika dengan beda 3. Jadi 12 + 3 = 15
-Penalaran Verbal,Hard,Semua A adalah B. Tidak ada B yang C. Kesimpulan?,Semua A adalah C,Tidak ada A yang C,Beberapa A adalah C,Semua C adalah A,Tidak dapat ditentukan,B,Jika semua A adalah B dan tidak ada B yang C maka tidak ada A yang C
+Verbal - Sinonim,Easy,INSOMNIA = ...?,Cemas,Sedih,Tak bisa tidur,Kenyataan,Mimpi buruk,C,Insomnia adalah gangguan yang menyebabkan sulit tidur.
+Verbal - Sinonim,Medium,BONAFIDE = ...?,Jujur,Dapat dipercaya,Surat berharga,Catatan,Jenis tanaman,B,Bonafide berarti dapat dipercaya dengan baik (tentang perusahaan dsb).
+Verbal - Sinonim,Hard,KLEPTOFOBIA = ...?,Takut kecurian,Takut berlebihan,Takut gelap,Takut ketinggian,Penyakit suka mencuri,A,Kleptofobia adalah rasa takut berlebihan (fobia) akan kecurian.
+Verbal - Antonim,Easy,PAKAR >< ...?,Ahli,Awam,Dokter,Pionir,Mahir,B,Pakar adalah ahli; lawannya adalah orang biasa atau awam.
+Verbal - Antonim,Medium,NOMADIK >< ...?,Berpindah,Menetap,Modern,Kuno,Sesuai norma,B,Nomadik artinya berpindah-pindah; lawannya adalah menetap.
+Verbal - Antonim,Hard,EKLEKTIK >< ...?,Memilih,Campuran,Tak pilih-pilih,Sempit,Radikal,C,Eklektik berarti memilih dari berbagai sumber (selektif); lawannya adalah tidak pilih-pilih (sembarangan).
+Verbal - Analogi,Easy,KAYU : KERTAS = ... : ...?,Meja : Kursi,Besi : Pisau,Plastik : Minyak,Kulit : Sepatu,Daun : Teh,B,Kayu diolah menjadi kertas; Besi diolah menjadi pisau (Bahan baku : Produk).
+Verbal - Analogi,Medium,SAPI : RUMPUT = ... : ...?,Manusia : Nasi,Macan : Daging,Kuda : Balapan,Mobil : Bensin,Api : Kayu,D,Sapi butuh rumput untuk energi; Mobil butuh bensin untuk energi (Sumber energi).
+Verbal - Analogi,Hard,TELESKOP : BINTANG = ... : ...?,Periskop : Kapal Selam,Mikroskop : Bakteri,Kamera : Foto,Lensa : Mata,Stetoskop : Telinga,B,Teleskop untuk melihat benda jauh (bintang); Mikroskop untuk melihat benda kecil (bakteri).
+Numerik - Aritmatika,Easy,Nilai dari 25% dari 160 adalah?,30,35,40,45,50,C,25% = 1/4. Maka 160 / 4 = 40.
+Numerik - Aritmatika,Medium,Jika a = 4 dan b = 3. Maka nilai dari (a^2 + 2ab + b^2) adalah?,14,25,36,49,64,D,Rumus (a+b)^2. Jadi (4+3)^2 = 7^2 = 49.
+Numerik - Aritmatika,Hard,0.875 : 0.25 + 0.44 = ?,3.50,3.94,4.24,2.50,3.44,B,0.875 = 7/8; 0.25 = 2/8. Maka 7/8 : 2/8 = 3.5. Ditambah 0.44 = 3.94.
+Numerik - Deret,Easy,2, 4, 8, 16, ...?,20,24,30,32,36,D,Setiap angka dikalikan 2. 16 x 2 = 32.
+Numerik - Deret,Medium,3, 5, 8, 12, ...?,15,16,17,18,19,C,Pola penambahan bertingkat: +2, +3, +4. Selanjutnya +5. 12 + 5 = 17.
+Numerik - Deret,Hard,1, 3, 2, 6, 5, 15, 14, ...?,28,30,32,42,45,D,Pola: x3, -1. (1x3=3; 3-1=2; 2x3=6; 6-1=5; 5x3=15; 15-1=14; 14x3=42).
+Numerik - Soal Cerita,Medium,Satu lusin pensil dibeli seharga Rp 36.000 dan dijual dengan harga Rp 3.500 per batang. Berapa persentase keuntungannya?,10%,15%,16.6%,20%,25%,C,Harga beli/batang = 3000. Harga jual = 3500. Untung 500. %Untung = (500/3000)*100% = 16.6%.
+Numerik - Perbandingan,Hard,Pekerja A bisa mengecat rumah dalam 6 hari. Pekerja B dalam 3 hari. Jika bekerja bersama, berapa hari selesai?,1 hari,2 hari,2.5 hari,3 hari,4 hari,B,Rumus gabungan: (A x B) / (A + B) = (6 x 3) / (6 + 3) = 18 / 9 = 2 Hari.
+Logika - Silogisme,Easy,Semua mamalia bernapas dengan paru-paru. Paus adalah mamalia. Kesimpulan?,Paus bernapas dengan insang,Paus bernapas dengan paru-paru,Sebagian paus bernapas dengan paru-paru,Paus bukan mamalia,Tidak dapat disimpulkan,B,Premis umum mutlak + premis khusus = kesimpulan khusus yang mengikuti sifat umum.
+Logika - Silogisme,Medium,Semua akuntan pandai menghitung. Sebagian yang pandai menghitung adalah pelit.,Semua akuntan pelit,Sebagian akuntan pelit,Sebagian yang pelit adalah akuntan,Tidak semua akuntan pandai menghitung,Tidak dapat ditarik kesimpulan,E,Kata 'sebagian' pada premis kedua tidak menjamin irisan dengan kelompok 'akuntan'. Bisa saja yang pelit itu bukan akuntan.
+Logika - Silogisme,Hard,Tidak ada pemalas yang sukses. Semua yang sukses adalah pekerja keras. Kesimpulan?,Sebagian pekerja keras bukan pemalas,Semua pemalas adalah pekerja keras,Tidak ada pekerja keras yang sukses,Semua pekerja keras adalah pemalas,Sebagian pemalas sukses,A,Jika sukses, pasti pekerja keras. Karena tidak ada pemalas yang sukses, maka orang sukses (yang pekerja keras itu) bukan pemalas.
+Logika - Analitis,Easy,Andi lebih tinggi dari Budi. Budi lebih tinggi dari Candra. Siapa yang paling pendek?,Andi,Budi,Candra,Andi dan Candra,Tidak ada,C,Urutan tinggi: Andi > Budi > Candra. Paling pendek Candra.
+Logika - Analitis,Medium,Dalam antrean: A di depan B. C di belakang B. D di depan A. Urutan dari depan?,D-A-B-C,A-B-C-D,D-A-C-B,A-D-B-C,C-B-A-D,A,D di depan A, A di depan B, C di belakang B. Jadi D-A-B-C.
+Logika - Analitis,Hard,Meja bundar dikelilingi A, B, C, D. A tidak bersebelahan dengan C. D ada di kanan A. Siapa di kiri A?,A,B,C,D,B atau C,B,Jika D di kanan A, dan A tidak boleh sebelah C, maka C harus di seberang A (sebelah D). Sisa tempat di kiri A adalah B.
+TIU - Figural,Easy,Manakah yang berbeda (ganjil) dari kelompok ini?,Emas,Perak,Perunggu,Batu Bara,Tembaga,D,Batu Bara adalah bahan bakar fosil (sedimen), sisanya adalah logam/mineral tambang logam.
+TIU - Pemahaman Bacaan,Medium,Ide pokok paragraf biasanya terletak di...?,Awal saja,Akhir saja,Tengah saja,Awal atau Akhir,Semua kalimat,D,Ide pokok (kalimat utama) pada umumnya deduktif (awal) atau induktif (akhir) atau campuran.
+Wawasan Kebangsaan,Easy,Dasar negara Indonesia adalah?,UUD 1945,Pancasila,Bhinneka Tunggal Ika,NKRI,Garuda,B,Pancasila adalah dasar negara (ideologi). UUD 1945 adalah konstitusi.
+Wawasan Kebangsaan,Medium,Amandemen UUD 1945 pertama kali dilakukan pada tahun?,1998,1999,2000,2001,2002,B,Sidang Umum MPR 1999 (14-21 Oktober 1999).
+Wawasan Kebangsaan,Hard,Kabinet pertama pada masa demokrasi terpimpin dipimpin oleh?,Soekarno,Hatta,Djuanda,Natsir,Wilopo,C,Kabinet Karya (Kabinet Djuanda) sebelum akhirnya Soekarno mengambil alih penuh.
+TKP - Pelayanan Publik,Medium,Ada pelanggan marah-marah karena antrean lama. Sikap Anda?,Diam saja,Meminta satpam mengusir,Mendengarkan keluhan dan meminta maaf,Meminta pelanggan sabar dengan nada tinggi,Pura-pura tidak dengar,C,Aspek pelayanan publik mengutamakan empati dan solusi (mendengarkan & minta maaf).
+TKP - Jejaring Kerja,Easy,Rekan kerja sakit dan tugasnya terbengkalai. Sikap Anda?,Membiarkannya,Melaporkan ke atasan,Mengerjakan tugasnya jika diminta,Menawarkan bantuan untuk mengerjakan tugas mendesak,Menyuruh teman lain mengerjakan,D,Menunjukkan inisiatif dan kerjasama tim yang positif.

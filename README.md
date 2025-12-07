@@ -90,24 +90,30 @@ Run tests with:
 npm test
 ```
 
-## Database Setup (Optional)
+## Database Setup (Required)
 
-This project supports both hardcoded questions and Supabase database.
+This project uses Supabase as the database for questions.
 
-### Using Supabase (Recommended for 100+ questions)
+### Setup Supabase
+
+You need to configure Supabase to use this application:
+
+1. Create a free Supabase account at https://supabase.com
+2. Create a new project
+3. Set up the questions table (see setup documentation)
+4. Add environment variables to `.env`:
+   ```
+   VITE_SUPABASE_URL=your_project_url
+   VITE_SUPABASE_ANON_KEY=your_anon_key
+   ```
 
 **Benefits:**
 - Add/edit questions without code changes
 - Scale to 100+ questions easily
 - Free tier supports thousands of questions
-- Automatic fallback to mock data
+- Real-time updates
 
-### Using Mock Data (Default)
-
-Questions are hardcoded in `src/mockData.ts`. Perfect for:
-- Development and testing
-- Small question sets (< 20 questions)
-- Offline usage
+**Note:** Mock data (`src/mockData.ts`) is kept for reference and testing purposes only.
 
 ## Deployment
 

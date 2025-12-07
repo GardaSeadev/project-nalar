@@ -25,14 +25,30 @@ interface CSVRow {
 
 function parseCSV(content: string): CSVRow[] {
   const lines = content.split('\n').filter(line => line.trim());
-  const headers = lines[0].split(',');
+  const headers = lines[0].split(',').map(h => h.trim());
   
   return lines.slice(1).map(line => {
-    // Simple CSV parser (doesn't handle commas in quotes)
-    const values = line.split(',');
+    // Parse CSV properly - split by comma but respect field boundaries
+    // Since we know the exact structure: 10 fields
+    const values: string[] = [];
+    let currentValue = '';
+    let fieldCount = 0;
+    
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === ',' && fieldCount < 9) {
+        values.push(currentValue.trim());
+        currentValue = '';
+        fieldCount++;
+      } else {
+        currentValue += line[i];
+      }
+    }
+    // Add the last field
+    values.push(currentValue.trim());
+    
     const row: any = {};
     headers.forEach((header, i) => {
-      row[header.trim()] = values[i]?.trim() || '';
+      row[header] = values[i] || '';
     });
     return row as CSVRow;
   });
@@ -65,11 +81,24 @@ try {
   
   console.log('-- Generated SQL from CSV');
   console.log('-- Copy and paste this into Supabase SQL Editor\n');
+  
+  console.log('-- STEP 1: Fix the sequence (if you get duplicate key error)');
+  console.log('-- Run this FIRST if you already have questions in your database:');
+  console.log('SELECT setval(\'questions_id_seq\', (SELECT MAX(id) FROM questions));\n');
+  
+  console.log('-- STEP 2: Insert new questions');
   console.log('INSERT INTO questions (type, difficulty, question, options, "correctId", explanation)');
   console.log('VALUES');
   console.log(rows.map(rowToSQL).join(',\n'));
-  console.log(';');
-  console.log(`\n-- Total questions: ${rows.length}`);
+  console.log(';\n');
+  
+  console.log(`-- Total new questions: ${rows.length}`);
+  console.log('\n-- TROUBLESHOOTING:');
+  console.log('-- If you still get "duplicate key" error after running STEP 1:');
+  console.log('-- 1. Check current max ID: SELECT MAX(id) FROM questions;');
+  console.log('-- 2. Check sequence value: SELECT last_value FROM questions_id_seq;');
+  console.log('-- 3. If they don\'t match, run STEP 1 again');
+  console.log('\n-- See DOCS_FOR_INTERNAL/FIX_SEQUENCE.md for detailed explanation.');
 } catch (error) {
   console.error('Error reading CSV file:', error);
   console.log('\nMake sure questionTemplate.csv exists in the scripts/ folder');

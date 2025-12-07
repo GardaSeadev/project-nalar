@@ -256,10 +256,15 @@ export function QuestionArena({ questions, onComplete }: QuestionArenaProps) {
 
       {/* Header Section */}
       <header className="flex justify-between items-center mb-6">
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           {/* Question Badge */}
           <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-semibold rounded">
-            Soal Harian #{questionData.id}
+            Soal #{questionData.id}
+          </span>
+          
+          {/* Question Type Badge */}
+          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-semibold rounded">
+            {questionData.type}
           </span>
           
           {/* Difficulty Badge */}

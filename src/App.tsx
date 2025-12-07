@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { QuestionArena } from './QuestionArena'
-import { mockQuestions } from './mockData'
 import { fetchRandomQuestions } from './supabaseClient'
 import type { QuestionData } from './types'
 import './App.css'
@@ -9,17 +8,9 @@ function App() {
   const [questions, setQuestions] = useState<QuestionData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [useSupabase, setUseSupabase] = useState(true)
 
   useEffect(() => {
     async function loadQuestions() {
-      // If Supabase is not configured, fall back to mock data
-      if (!useSupabase || !import.meta.env.VITE_SUPABASE_URL) {
-        setQuestions(mockQuestions)
-        setLoading(false)
-        return
-      }
-
       try {
         setLoading(true)
         const data = await fetchRandomQuestions(10)
@@ -27,15 +18,14 @@ function App() {
         setError(null)
       } catch (err) {
         console.error('Failed to fetch questions from Supabase:', err)
-        setError('Failed to load questions from database. Using local questions.')
-        setQuestions(mockQuestions)
+        setError('Failed to load questions from database. Please check your connection.')
       } finally {
         setLoading(false)
       }
     }
 
     loadQuestions()
-  }, [useSupabase])
+  }, [])
 
   const handleComplete = (score: number, accuracy: number) => {
     console.log('Session completed!')
@@ -54,6 +44,38 @@ function App() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="text-red-600 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Unable to Load Questions</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="text-gray-400 text-6xl mb-4">📝</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Questions Available</h2>
+          <p className="text-gray-600 mb-6">
+            There are no questions in the database yet. Please add some questions to get started.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
       <div className="container mx-auto max-w-5xl">
@@ -63,25 +85,8 @@ function App() {
             Project NALAR
           </h1>
           <p className="text-gray-600 text-lg">
-            Question Arena Demo - Academic Potential Test Practice
+            Academic Potential Test Practice
           </p>
-          
-          {/* Error message */}
-          {error && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">
-              {error}
-            </div>
-          )}
-          
-          {/* Toggle for testing */}
-          <div className="mt-4">
-            <button
-              onClick={() => setUseSupabase(!useSupabase)}
-              className="text-sm text-indigo-600 hover:text-indigo-700 underline"
-            >
-              {useSupabase ? 'Switch to Mock Data' : 'Switch to Supabase'}
-            </button>
-          </div>
         </header>
 
         {/* Question Arena Component */}
@@ -93,7 +98,6 @@ function App() {
         {/* Footer */}
         <footer className="mt-8 text-center text-sm text-gray-500">
           <p>
-            This is a demo of the Question Arena component. 
             Click through all {questions.length} questions to see different difficulty levels and question types.
           </p>
         </footer>
