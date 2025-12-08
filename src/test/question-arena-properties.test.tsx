@@ -122,15 +122,14 @@ describe('QuestionArena Property-Based Tests', () => {
             correctButton!.click();
           });
 
-          // Verify green styling is applied
+          // Verify green glassmorphic styling is applied
           const buttonClasses = correctButton!.className;
-          expect(buttonClasses).toContain('bg-green-100');
+          expect(buttonClasses).toContain('bg-green-500/20');
           expect(buttonClasses).toContain('border-green-500');
 
-          // Verify "Benar!" badge appears
-          const benarBadge = correctButton!.querySelector('span:last-child');
-          expect(benarBadge).toBeTruthy();
-          expect(benarBadge!.textContent).toContain('Benar!');
+          // Verify CheckCircle icon appears (replaces "Benar!" text)
+          const checkIcon = correctButton!.querySelector('.lucide-circle-check-big');
+          expect(checkIcon).toBeTruthy();
 
           // Clean up this specific render
           unmount();
@@ -193,12 +192,12 @@ describe('QuestionArena Property-Based Tests', () => {
           // Determine expected styling based on correctness
           const isFirstCorrect = firstOptionId === currentQuestion.correctId;
 
-          // Verify first click worked correctly
+          // Verify first click worked correctly with glassmorphic styling
           if (isFirstCorrect) {
-            expect(firstButtonClassesAfterFirstClick).toContain('bg-green-100');
+            expect(firstButtonClassesAfterFirstClick).toContain('bg-green-500/20');
             expect(firstButtonClassesAfterFirstClick).toContain('border-green-500');
           } else {
-            expect(firstButtonClassesAfterFirstClick).toContain('bg-red-100');
+            expect(firstButtonClassesAfterFirstClick).toContain('bg-red-500/20');
             expect(firstButtonClassesAfterFirstClick).toContain('border-red-500');
           }
 
@@ -215,12 +214,12 @@ describe('QuestionArena Property-Based Tests', () => {
           expect(firstButtonClassesAfterSecondClick).toBe(firstButtonClassesAfterFirstClick);
           expect(secondButtonClassesAfterSecondClick).toBe(secondButtonClassesAfterFirstClick);
 
-          // Verify the first button still has the same styling
+          // Verify the first button still has the same glassmorphic styling
           if (isFirstCorrect) {
-            expect(firstButtonClassesAfterSecondClick).toContain('bg-green-100');
+            expect(firstButtonClassesAfterSecondClick).toContain('bg-green-500/20');
             expect(firstButtonClassesAfterSecondClick).toContain('border-green-500');
           } else {
-            expect(firstButtonClassesAfterSecondClick).toContain('bg-red-100');
+            expect(firstButtonClassesAfterSecondClick).toContain('bg-red-500/20');
             expect(firstButtonClassesAfterSecondClick).toContain('border-red-500');
           }
 

@@ -33,8 +33,8 @@ describe('QuestionArena Edge Cases', () => {
   });
 
   /**
-   * Test: Timer stops at zero and doesn't go negative
-   * Requirement: 2.4
+   * Test: Timer stops at zero and triggers auto-advance
+   * Requirement: 2.4, 15.1
    */
   it('should stop timer at zero and not go negative', () => {
     vi.useFakeTimers();
@@ -49,19 +49,16 @@ describe('QuestionArena Edge Cases', () => {
       vi.advanceTimersByTime(30000);
     });
 
-    // Timer should be at 00:00
-    expect(screen.getByText('00:00')).toBeInTheDocument();
+    // Timer should trigger timeout toast
+    expect(screen.getByText('Waktu Habis!')).toBeInTheDocument();
 
-    // Advance time by another 5 seconds
+    // Advance time by 1 second for auto-advance
     act(() => {
-      vi.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(1000);
     });
 
-    // Timer should still be at 00:00, not negative
-    expect(screen.getByText('00:00')).toBeInTheDocument();
-
-    // Verify no negative time is displayed
-    expect(screen.queryByText(/-\d+:\d+/)).not.toBeInTheDocument();
+    // Should show summary card after auto-advance
+    expect(screen.getByText(/completed all questions/i)).toBeInTheDocument();
     
     vi.useRealTimers();
   });
@@ -71,15 +68,23 @@ describe('QuestionArena Edge Cases', () => {
    * Requirement: 2.4 (graceful handling)
    */
   it('should handle missing onComplete callback gracefully', async () => {
+    vi.useFakeTimers();
+    
     // Render without onComplete callback
     render(<QuestionArena questions={[mockQuestion]} />);
 
     // Click an option to answer
     const optionA = screen.getByText(/Option A/i);
+    
+    // Use real timers for user interaction
+    vi.useRealTimers();
     await userEvent.click(optionA);
+    vi.useFakeTimers();
 
     // Click Next button
     const nextButton = screen.getByRole('button', { name: /Next Question/i });
+    
+    vi.useRealTimers();
     await userEvent.click(nextButton);
 
     // Should show summary card without errors
@@ -87,6 +92,8 @@ describe('QuestionArena Edge Cases', () => {
 
     // Component should render successfully without callback
     expect(screen.getByText(/Final Score/i)).toBeInTheDocument();
+    
+    vi.useRealTimers();
   });
 
   /**
@@ -94,12 +101,17 @@ describe('QuestionArena Edge Cases', () => {
    * Requirement: 3.5
    */
   it('should prevent race conditions from rapid clicking', async () => {
+    vi.useFakeTimers();
+    
     render(<QuestionArena questions={[mockQuestion]} />);
 
     // Get option buttons
     const optionA = screen.getByText(/Option A/i);
     const optionB = screen.getByText(/Option B/i);
 
+    // Use real timers for user interactions
+    vi.useRealTimers();
+    
     // Rapidly click multiple options
     await userEvent.click(optionA);
     await userEvent.click(optionB);
@@ -107,17 +119,20 @@ describe('QuestionArena Edge Cases', () => {
     await userEvent.click(optionB);
 
     // Only the first click should register (Option A is correct)
-    // Option A should have green styling
+    // Option A should have green glassmorphic styling
     const optionAButton = optionA.closest('button');
-    expect(optionAButton).toHaveClass('bg-green-100');
+    expect(optionAButton).toHaveClass('bg-green-500/20');
+    expect(optionAButton).toHaveClass('border-green-500');
 
     // Option B should not have red styling (wasn't selected)
     const optionBButton = optionB.closest('button');
-    expect(optionBButton).not.toHaveClass('bg-red-100');
+    expect(optionBButton).not.toHaveClass('bg-red-500/20');
 
-    // Verify "Benar!" badge appears only once
-    const correctBadges = screen.getAllByText('Benar!');
-    expect(correctBadges).toHaveLength(1);
+    // Verify CheckCircle icon appears (replaces "Benar!" text)
+    const checkIcons = optionAButton?.querySelectorAll('.lucide-circle-check-big');
+    expect(checkIcons).toHaveLength(1);
+    
+    vi.useRealTimers();
   });
 
   /**
@@ -144,10 +159,15 @@ describe('QuestionArena Edge Cases', () => {
    * Requirement: 3.5
    */
   it('should handle rapid clicking on Next button gracefully', async () => {
+    vi.useFakeTimers();
+    
     const onCompleteMock = vi.fn();
 
     render(<QuestionArena questions={[mockQuestion]} onComplete={onCompleteMock} />);
 
+    // Use real timers for user interactions
+    vi.useRealTimers();
+    
     // Answer the question first
     const optionA = screen.getByText(/Option A/i);
     await userEvent.click(optionA);
@@ -162,6 +182,8 @@ describe('QuestionArena Edge Cases', () => {
 
     // onComplete should be called exactly once
     expect(onCompleteMock).toHaveBeenCalledTimes(1);
+    
+    vi.useRealTimers();
   });
 
   /**
@@ -188,7 +210,9 @@ describe('QuestionArena Edge Cases', () => {
     const optionA = screen.getByText(/Option A/i);
     await userEvent.click(optionA);
 
-    // Verify the answer was registered
-    expect(screen.getByText('Benar!')).toBeInTheDocument();
+    // Verify the answer was registered by checking for CheckCircle icon
+    const optionAButton = optionA.closest('button');
+    const checkIcon = optionAButton?.querySelector('.lucide-circle-check-big');
+    expect(checkIcon).toBeInTheDocument();
   });
 });

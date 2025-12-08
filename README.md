@@ -90,22 +90,62 @@ Run tests with:
 npm test
 ```
 
-## Database Setup (Required)
+## Environment Setup
+
+This project requires environment variables to connect to Supabase.
+
+### 1. Create Environment File
+
+Create a `.env` file in the root directory of the project:
+
+```bash
+# Copy from example (if available)
+cp DOCS_FOR_INTERNAL/.env.example .env
+
+# Or create manually
+touch .env
+```
+
+### 2. Configure Environment Variables
+
+Add the following variables to your `.env` file:
+
+```env
+# Supabase Configuration
+# Get these values from: https://app.supabase.com/project/_/settings/api
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+**Where to find these values:**
+1. Go to your [Supabase Dashboard](https://app.supabase.com)
+2. Select your project
+3. Navigate to **Settings** → **API**
+4. Copy the **Project URL** (for `VITE_SUPABASE_URL`)
+5. Copy the **anon/public key** (for `VITE_SUPABASE_ANON_KEY`)
+
+### 3. Verify Configuration
+
+The application will automatically:
+- Read environment variables on startup
+- Fall back to mock data if Supabase is not configured
+- Display a subtle indicator when using fallback data
+
+**Important Notes:**
+- The `.env` file is already in `.gitignore` and will not be committed
+- Never commit your actual Supabase credentials to version control
+- For production deployments, set these variables in your hosting platform (Vercel, Netlify, etc.)
+
+## Database Setup (Supabase)
 
 This project uses Supabase as the database for questions.
 
 ### Setup Supabase
 
-You need to configure Supabase to use this application:
-
-1. Create a free Supabase account at https://supabase.com
-2. Create a new project
-3. Set up the questions table (see setup documentation)
-4. Add environment variables to `.env`:
-   ```
-   VITE_SUPABASE_URL=your_project_url
-   VITE_SUPABASE_ANON_KEY=your_anon_key
-   ```
+1. **Create Account**: Sign up at [https://supabase.com](https://supabase.com)
+2. **Create Project**: Click "New Project" and fill in the details
+3. **Set up Questions Table**: See `DOCS_FOR_INTERNAL/SUPABASE_SETUP.md` for schema
+4. **Configure Environment**: Add your credentials to `.env` (see Environment Setup above)
 
 **Benefits:**
 - Add/edit questions without code changes
