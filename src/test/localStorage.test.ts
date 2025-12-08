@@ -2,9 +2,6 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { loadUserProgress, saveUserProgress, calculateStreak, STORAGE_KEY } from '../localStorage';
 
 describe('localStorage utilities', () => {
-  // Store original localStorage to restore after tests
-  let originalLocalStorage: Storage;
-
   beforeEach(() => {
     // Clear localStorage before each test
     localStorage.clear();

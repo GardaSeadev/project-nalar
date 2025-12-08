@@ -1,11 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import * as fc from 'fast-check';
 import App from '../App';
 import * as supabaseClient from '../supabaseClient';
 import { mockQuestions } from '../mockData';
-import { questionDataArbitrary } from './generators';
 
 /**
  * Integration test for App component with game state machine
@@ -121,9 +119,6 @@ describe('App Integration', () => {
 
     // Mock Supabase to return our test questions
     const mockFetch = vi.spyOn(supabaseClient, 'fetchQuestionsFromSupabase').mockResolvedValue(questions);
-    
-    // Mock onComplete to verify it gets called
-    const mockOnComplete = vi.fn();
 
     const user = userEvent.setup();
     const { unmount } = render(<App />);
@@ -668,7 +663,7 @@ describe('Complete User Flow Integration Tests', () => {
     // Current streak should still show 5 (not updated until quiz completes)
     // The streak is displayed as "🔥 5" so we need to check for the text content
     expect(screen.getByText(/🔥/)).toBeInTheDocument();
-    expect(screen.getByText((content, element) => {
+    expect(screen.getByText((_content, element) => {
       return element?.textContent === '🔥 5';
     })).toBeInTheDocument();
 
