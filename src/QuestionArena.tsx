@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, CheckCircle, ArrowRight, Trophy, RotateCcw } from 'lucide-react';
+import { Clock, CheckCircle, Trophy, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import type { QuestionArenaProps, RankType } from './types';
@@ -102,7 +102,7 @@ function triggerConfetti(): void {
  * An interactive quiz component that displays a multiple-choice question
  * with immediate feedback, explanations, and a countdown timer.
  */
-export function QuestionArena({ questions, onComplete, onQuit, onTryAgain, highScore = 0, gameState, onQuestionIndexChange, onScoreChange, onStreakChange, finalScore: propFinalScore, finalAccuracy: propFinalAccuracy }: QuestionArenaProps) {
+export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0, gameState, onQuestionIndexChange, onScoreChange, onStreakChange, finalScore: propFinalScore, finalAccuracy: propFinalAccuracy, renderNextButton }: QuestionArenaProps) {
   // Session management state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
@@ -143,19 +143,12 @@ export function QuestionArena({ questions, onComplete, onQuit, onTryAgain, highS
     }
   }, [streak, onStreakChange]);
 
-  // Notify parent component when score changes
+  // Notify parent about Next button state via renderNextButton
   useEffect(() => {
-    if (onScoreChange) {
-      onScoreChange(score);
+    if (renderNextButton) {
+      renderNextButton(handleNext, isAnswered);
     }
-  }, [score, onScoreChange]);
-
-  // Notify parent component when streak changes
-  useEffect(() => {
-    if (onStreakChange) {
-      onStreakChange(streak);
-    }
-  }, [streak, onStreakChange]);
+  }, [isAnswered, renderNextButton]);
 
   // Reset all quiz session state when transitioning to IDLE (for Try Again functionality)
   useEffect(() => {
@@ -370,17 +363,12 @@ export function QuestionArena({ questions, onComplete, onQuit, onTryAgain, highS
     }
   };
 
-  // Quit button click handler - exits to lobby
-  const handleQuitClick = () => {
-    // Invoke onQuit callback with current score if provided
-    if (onQuit) {
-      onQuit(score);
-    }
-  };
+
 
   // Helper function to determine option styling with glassmorphic effects
+  // min-h-[48px] ensures touch-friendly target size
   const getOptionGlassClasses = (optionId: string) => {
-    const baseClasses = 'w-full text-left backdrop-blur-lg flex items-center p-6 rounded-xl border-2 transition-all duration-200';
+    const baseClasses = 'w-full text-left backdrop-blur-lg flex items-center p-4 sm:p-6 min-h-[48px] rounded-xl border-2 transition-all duration-200';
     
     // If not answered yet, show default glassmorphic styling
     if (!isAnswered) {
@@ -474,47 +462,47 @@ export function QuestionArena({ questions, onComplete, onQuit, onTryAgain, highS
           )}
 
           {/* Title */}
-          <h2 className="text-4xl font-bold text-white text-center mb-4">
+          <h2 className="text-2xl sm:text-4xl font-bold text-white text-center mb-3 sm:mb-4">
             {displayAccuracy >= 80 ? 'Excellent Work!' : displayAccuracy >= 60 ? 'Good Job!' : 'Keep Practicing!'}
           </h2>
-          <p className="text-slate-300 text-center text-lg mb-12">You've completed all questions</p>
+          <p className="text-slate-300 text-center text-base sm:text-lg mb-8 sm:mb-12">You've completed all questions</p>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-6 mb-8">
+          {/* Stats Grid - Responsive: 1 column on mobile, 3 on desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
             {/* Final Score */}
             <motion.div 
-              className="backdrop-blur-lg bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-8 text-center"
+              className="backdrop-blur-lg bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-6 sm:p-8 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
               whileHover={{ scale: 1.05, borderColor: "rgba(99, 102, 241, 0.5)" }}
             >
-              <p className="text-sm font-semibold text-indigo-300 mb-3">Final Score</p>
-              <p className="text-5xl font-bold text-indigo-400">{displayScore} XP</p>
+              <p className="text-xs sm:text-sm font-semibold text-indigo-300 mb-2 sm:mb-3">Final Score</p>
+              <p className="text-4xl sm:text-5xl font-bold text-indigo-400">{displayScore} XP</p>
             </motion.div>
 
             {/* Accuracy */}
             <motion.div 
-              className="backdrop-blur-lg bg-green-500/10 border border-green-500/30 rounded-2xl p-8 text-center"
+              className="backdrop-blur-lg bg-green-500/10 border border-green-500/30 rounded-2xl p-6 sm:p-8 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
               whileHover={{ scale: 1.05, borderColor: "rgba(34, 197, 94, 0.5)" }}
             >
-              <p className="text-sm font-semibold text-green-300 mb-3">Accuracy</p>
-              <p className="text-5xl font-bold text-green-400">{displayAccuracy.toFixed(0)}%</p>
+              <p className="text-xs sm:text-sm font-semibold text-green-300 mb-2 sm:mb-3">Accuracy</p>
+              <p className="text-4xl sm:text-5xl font-bold text-green-400">{displayAccuracy.toFixed(0)}%</p>
             </motion.div>
 
             {/* Correct Count */}
             <motion.div 
-              className="backdrop-blur-lg bg-blue-500/10 border border-blue-500/30 rounded-2xl p-8 text-center"
+              className="backdrop-blur-lg bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 sm:p-8 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
               whileHover={{ scale: 1.05, borderColor: "rgba(59, 130, 246, 0.5)" }}
             >
-              <p className="text-sm font-semibold text-blue-300 mb-3">Correct Answers</p>
-              <p className="text-5xl font-bold text-blue-400">
+              <p className="text-xs sm:text-sm font-semibold text-blue-300 mb-2 sm:mb-3">Correct Answers</p>
+              <p className="text-4xl sm:text-5xl font-bold text-blue-400">
                 {displayCorrectAnswers}/{questions.length}
               </p>
             </motion.div>
@@ -523,14 +511,14 @@ export function QuestionArena({ questions, onComplete, onQuit, onTryAgain, highS
           {/* Play Again Button */}
           <motion.button
             onClick={handleTryAgain}
-            className="w-full py-6 bg-indigo-600 text-white rounded-2xl font-bold text-2xl shadow-lg shadow-indigo-500/50 flex items-center justify-center gap-3"
+            className="w-full py-4 sm:py-6 bg-indigo-600 text-white rounded-2xl font-bold text-xl sm:text-2xl shadow-lg shadow-indigo-500/50 flex items-center justify-center gap-2 sm:gap-3"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.0 }}
             whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(99, 102, 241, 0.8)" }}
             whileTap={{ scale: 0.95 }}
           >
-            <RotateCcw size={28} />
+            <RotateCcw size={24} className="sm:w-7 sm:h-7" />
             Play Again
           </motion.button>
         </div>
@@ -541,66 +529,42 @@ export function QuestionArena({ questions, onComplete, onQuit, onTryAgain, highS
   // Render Question Interface
   return (
     <motion.div 
-      className="max-w-4xl mx-auto backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10"
-      animate={triggerShake ? { x: [-10, 10, -10, 10, 0] } : { x: 0 }}
-      transition={{ duration: 0.5 }}
+      className="max-w-4xl mx-auto backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-6 sm:p-10"
+      animate={triggerShake ? { 
+        scale: [1, 0.98, 1.01, 0.99, 1],
+        opacity: [1, 0.8, 1]
+      } : { scale: 1, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
       onAnimationComplete={() => {
         if (triggerShake) {
           setTriggerShake(false);
         }
       }}
     >
-      {/* Progress Bar Section with Quit Button */}
-      <div className="mb-6 flex justify-between items-center">
-        <p className="text-sm font-semibold text-gray-600">
-          Question {currentQuestionIndex + 1} of {questions.length}
-        </p>
-        
-        {/* Quit Button */}
-        <button
-          onClick={handleQuitClick}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold text-sm hover:bg-red-700 active:scale-95 transition-all duration-200"
-        >
-          Quit
-        </button>
-      </div>
-
-      {/* Score & Streak Display */}
-      <div className="mb-6 relative flex items-center gap-6">
-        <div className="text-xl font-bold text-indigo-600">
-          {score} XP
+      {/* +20 XP Floating Animation */}
+      {showXPAnimation && (
+        <div className="absolute left-0 top-0 text-xl font-bold text-green-400 animate-float-up z-10">
+          +20 XP
         </div>
-        
-        {/* Streak Display */}
-        <div className="text-xl font-bold text-orange-600 flex items-center gap-1">
-          <span>🔥</span>
-          <span>{streak}</span>
-        </div>
-        
-        {/* +20 XP Floating Animation */}
-        {showXPAnimation && (
-          <div className="absolute left-0 top-0 text-xl font-bold text-green-600 animate-float-up">
-            +20 XP
-          </div>
-        )}
-      </div>
+      )}
 
-      {/* Header Section */}
-      <header className="flex justify-between items-center mb-6">
-        <div className="flex gap-3 flex-wrap">
+      {/* Header Section with Badges and Timer */}
+      <header className="flex justify-between items-center mb-6 gap-4">
+        {/* Left: Badges */}
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           {/* Question Badge */}
-          <span className="px-3 py-1 bg-slate-800/50 border border-white/10 text-slate-300 text-sm font-semibold rounded">
+          <span className="px-3 sm:px-4 py-2 bg-slate-800/50 border border-white/10 text-slate-300 text-xs sm:text-sm font-semibold rounded-lg">
             Soal #{questionData.id}
           </span>
           
           {/* Question Type Badge */}
-          <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/50 text-blue-300 text-sm font-semibold rounded">
+          <span className="px-3 sm:px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-300 text-xs sm:text-sm font-semibold rounded-lg">
             {questionData.type}
           </span>
           
           {/* Difficulty Badge */}
           <span
-            className={`px-3 py-1 text-sm font-semibold rounded border ${
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg border ${
               questionData.difficulty === 'Easy'
                 ? 'bg-green-500/20 border-green-500/50 text-green-300'
                 : questionData.difficulty === 'Medium'
@@ -612,16 +576,16 @@ export function QuestionArena({ questions, onComplete, onQuit, onTryAgain, highS
           </span>
         </div>
 
-        {/* Countdown Timer */}
+        {/* Right: Timer */}
         <div
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-lg ${
+          className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg backdrop-blur-lg ${
             timeRemaining <= 10 
               ? 'bg-red-500/20 border border-red-500/50 text-red-400' 
               : 'bg-white/5 border border-white/10 text-slate-300'
           }`}
         >
-          <Clock size={20} />
-          <span className="text-lg font-bold">
+          <Clock size={18} className="sm:w-5 sm:h-5" />
+          <span className="text-base sm:text-lg font-bold">
             {Math.floor(timeRemaining / 60)
               .toString()
               .padStart(2, '0')}
@@ -631,14 +595,31 @@ export function QuestionArena({ questions, onComplete, onQuit, onTryAgain, highS
       </header>
 
       {/* Question Section */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold text-white leading-relaxed">
+      <section className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-semibold text-white leading-relaxed">
           {questionData.question}
         </h2>
       </section>
 
-      {/* Options Section */}
-      <section className="mb-6 space-y-4">
+      {/* Explanation Section (Conditional) - Shows right after question */}
+      <AnimatePresence>
+        {isAnswered && (
+          <motion.div
+            className="backdrop-blur-lg bg-blue-500/10 border border-blue-500/30 rounded-2xl p-4 sm:p-6 mb-6 overflow-hidden"
+            initial={{ opacity: 0, scaleY: 0 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            exit={{ opacity: 0, scaleY: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            style={{ transformOrigin: "top" }}
+          >
+            <h3 className="font-semibold text-blue-300 mb-2 text-sm sm:text-base">Penjelasan:</h3>
+            <p className="text-slate-200 leading-relaxed text-sm sm:text-base">{questionData.explanation}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Options Section - Touch-Friendly */}
+      <section className="mb-6 space-y-3 sm:space-y-4">
         {questionData.options.map((option) => {
           const isSelected = selectedOption === option.id;
           const isCorrect = option.id === questionData.correctId;
@@ -652,60 +633,26 @@ export function QuestionArena({ questions, onComplete, onQuit, onTryAgain, highS
               whileHover={!isAnswered ? { scale: 1.02, borderColor: "rgba(255,255,255,0.3)" } : {}}
               whileTap={!isAnswered ? { scale: 0.98 } : {}}
             >
-              <span className="font-bold text-slate-300 mr-4">{option.id}.</span>
-              <span className="text-white">{option.text}</span>
+              <span className="font-bold text-slate-300 mr-3 sm:mr-4">{option.id}.</span>
+              <span className="text-white text-sm sm:text-base">{option.text}</span>
               
               {/* Correct Answer Badge */}
               {showCorrectBadge && (
-                <CheckCircle className="ml-auto text-green-400" size={24} />
+                <CheckCircle className="ml-auto text-green-400" size={20} />
               )}
             </motion.button>
           );
         })}
       </section>
 
-      {/* Explanation Section (Conditional) */}
-      <AnimatePresence>
-        {isAnswered && (
-          <motion.div
-            className="backdrop-blur-lg bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 mb-6"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h3 className="font-semibold text-blue-300 mb-2">Penjelasan:</h3>
-            <p className="text-slate-200 leading-relaxed">{questionData.explanation}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Timeout Toast Notification */}
       {showTimeoutToast && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="bg-red-600 text-white px-8 py-4 rounded-lg shadow-2xl text-center">
+          <div className="backdrop-blur-xl bg-red-600/90 border border-red-500 text-white px-8 py-4 rounded-lg shadow-2xl text-center">
             <p className="text-2xl font-bold">Waktu Habis!</p>
           </div>
         </div>
       )}
-
-      {/* Footer Section */}
-      <footer className="flex justify-end">
-        <motion.button
-          disabled={!isAnswered}
-          onClick={handleNext}
-          className={`flex items-center gap-2 px-8 py-4 rounded-xl text-lg font-semibold ${
-            isAnswered
-              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50'
-              : 'bg-white/5 text-slate-500 cursor-not-allowed'
-          }`}
-          whileHover={isAnswered ? { scale: 1.05, boxShadow: "0 0 30px rgba(99, 102, 241, 0.6)" } : {}}
-          whileTap={isAnswered ? { scale: 0.95 } : {}}
-        >
-          Next Question
-          <ArrowRight size={20} />
-        </motion.button>
-      </footer>
     </motion.div>
   );
 }

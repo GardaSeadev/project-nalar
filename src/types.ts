@@ -35,7 +35,6 @@ export interface QuestionData {
 export interface QuestionArenaProps {
   questions: QuestionData[];  // Array of all questions
   onComplete?: (score: number, accuracy: number) => void;  // Optional callback when session completes
-  onQuit?: (score: number) => void;  // Optional callback when user quits the session
   onTryAgain?: () => void;  // Optional callback when user clicks Try Again
   highScore?: number;  // Optional high score to check for new high score
   gameState?: GameState;  // Optional game state to determine what to render
@@ -44,6 +43,7 @@ export interface QuestionArenaProps {
   onStreakChange?: (streak: number) => void;  // Optional callback when streak changes
   finalScore?: number;  // Optional final score to display in FINISHED state
   finalAccuracy?: number;  // Optional final accuracy to display in FINISHED state
+  renderNextButton?: (handleNext: () => void, isAnswered: boolean) => React.ReactNode;  // Optional render prop for Next button
 }
 
 /**

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
 import { QuestionArena } from './QuestionArena'
 import { fetchQuestionsFromSupabase } from './supabaseClient'
 import { loadUserProgress, saveUserProgress, calculateStreak } from './localStorage'
@@ -25,6 +26,10 @@ function App() {
   // State for tracking score and streak in PLAYING state (for header display)
   const [currentScore, setCurrentScore] = useState<number>(0)
   const [currentStreakInGame, setCurrentStreakInGame] = useState<number>(0)
+  
+  // Ref for Next button handler in fixed footer
+  const nextButtonHandlerRef = useRef<(() => void) | null>(null)
+  const [isAnswered, setIsAnswered] = useState<boolean>(false)
   
   // State for tracking final results to display in FINISHED state
   const [finalScore, setFinalScore] = useState<number>(0)
@@ -71,6 +76,8 @@ function App() {
     // Reset score and streak for new game
     setCurrentScore(0);
     setCurrentStreakInGame(0);
+    setIsAnswered(false);
+    nextButtonHandlerRef.current = null;
     setGameState('PLAYING')
   }
 
@@ -138,8 +145,10 @@ function App() {
     // Update state
     setUserXP(newUserXP)
     
-    // Reset question index
+    // Reset question index and Next button state
     setCurrentQuestionIndex(0);
+    setIsAnswered(false);
+    nextButtonHandlerRef.current = null;
     
     // Transition gameState to IDLE
     setGameState('IDLE')
@@ -218,12 +227,12 @@ function App() {
   // Render Quiz Arena when gameState === 'PLAYING'
   if (gameState === 'PLAYING') {
     return (
-      <div className="min-h-screen relative">
+      <div className="h-dvh flex flex-col relative overflow-hidden">
         <BackgroundGradient />
         
-        {/* Floating Header */}
+        {/* SECTION 1: Fixed Header (Top) - flex-none */}
         <motion.div 
-          className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-slate-900/50 border-b border-white/10"
+          className="flex-none backdrop-blur-xl bg-slate-900/50 border-b border-white/10 z-50"
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.5 }}
@@ -239,20 +248,21 @@ function App() {
           </div>
           
           {/* Header Content */}
-          <div className="flex justify-between items-center px-8 py-4">
-            <div className="flex items-center gap-6">
-              <p className="text-slate-300 text-sm">
+          <div className="flex justify-between items-center px-4 sm:px-8 py-4">
+            <div className="flex items-center gap-3 sm:gap-6">
+              <p className="text-slate-300 text-xs sm:text-sm">
                 Question {currentQuestionIndex + 1} of {questions.length}
               </p>
-              <div className="text-2xl font-bold text-indigo-400">{currentScore} XP</div>
-              <div className="text-2xl font-bold text-orange-400 flex items-center gap-1">
+              <div className="text-xl sm:text-2xl font-bold text-indigo-400">{currentScore} XP</div>
+              <div className="text-xl sm:text-2xl font-bold text-orange-400 flex items-center gap-1">
                 <span>🔥</span>
                 <span>{currentStreakInGame}</span>
               </div>
             </div>
             
+            {/* SINGLE Quit Button - Top Right */}
             <motion.button
-              className="px-6 py-2 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg font-semibold"
+              className="px-4 sm:px-6 py-2 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg font-semibold text-sm sm:text-base"
               whileHover={{ scale: 1.05, backgroundColor: "rgba(239, 68, 68, 0.3)" }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleQuit(currentScore)}
@@ -262,20 +272,45 @@ function App() {
           </div>
         </motion.div>
         
-        {/* Main Content Area */}
-        <div className="pt-32 pb-8 px-4">
+        {/* SECTION 2: Scrollable Content (Middle - flex-1) */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
           <div className="container mx-auto max-w-5xl">
             {/* Question Arena Component */}
             <QuestionArena 
               questions={questions} 
               onComplete={handleComplete}
-              onQuit={handleQuit}
               highScore={highScore}
               gameState={gameState}
               onQuestionIndexChange={setCurrentQuestionIndex}
               onScoreChange={setCurrentScore}
               onStreakChange={setCurrentStreakInGame}
+              renderNextButton={(handleNext, answered) => {
+                // Store the handler in ref so we can call it from the footer
+                nextButtonHandlerRef.current = handleNext;
+                setIsAnswered(answered);
+                return null; // Don't render inside the card
+              }}
             />
+          </div>
+        </div>
+        
+        {/* SECTION 3: Fixed Footer (Bottom) - ALWAYS VISIBLE */}
+        <div className="flex-none backdrop-blur-xl bg-slate-900/80 border-t border-white/10 px-4 sm:px-8 py-4">
+          <div className="max-w-4xl mx-auto flex justify-end">
+            <motion.button
+              disabled={!isAnswered}
+              onClick={() => nextButtonHandlerRef.current?.()}
+              className={`flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg ${
+                isAnswered
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50'
+                  : 'bg-white/5 text-slate-500 cursor-not-allowed'
+              }`}
+              whileHover={isAnswered ? { scale: 1.05, boxShadow: "0 0 30px rgba(99, 102, 241, 0.6)" } : {}}
+              whileTap={isAnswered ? { scale: 0.95 } : {}}
+            >
+              Next Question
+              <ArrowRight size={18} className="sm:w-5 sm:h-5" />
+            </motion.button>
           </div>
         </div>
       </div>
@@ -292,7 +327,6 @@ function App() {
         <QuestionArena 
           questions={questions} 
           onComplete={handleComplete}
-          onQuit={handleQuit}
           onTryAgain={handleTryAgain}
           highScore={highScore}
           gameState={gameState}
