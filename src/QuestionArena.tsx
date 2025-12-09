@@ -118,6 +118,7 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [showTimeoutToast, setShowTimeoutToast] = useState<boolean>(false);
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
+  const [shouldAutoAdvance, setShouldAutoAdvance] = useState<boolean>(false); // Track when to auto-advance
 
   // Get current question data
   const questionData = questions[currentQuestionIndex];
@@ -165,6 +166,7 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
       setIsNewHighScore(false);
       setShowTimeoutToast(false);
       setTriggerShake(false);
+      setShouldAutoAdvance(false);
     }
   }, [gameState]);
 
@@ -186,14 +188,20 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
         
         // Check if timer is about to expire (will be 0 after this decrement)
         if (prevTime === 1) {
-          // Timer is expiring - handle timeout
-          // Mark answer as incorrect (don't increment score/correctAnswers)
-          // Reset streak to 0
-          setStreak(0);
-          // Set showTimeoutToast to true
-          setShowTimeoutToast(true);
-          // Mark as answered to prevent further interaction
-          setIsAnswered(true);
+          // Timer is expiring
+          // Check if user has already answered using a ref check
+          setIsAnswered((currentIsAnswered) => {
+            if (!currentIsAnswered) {
+              // User did NOT answer - show timeout toast and delay auto-advance
+              setStreak(0);
+              setShowTimeoutToast(true);
+              // Will auto-advance after 5 seconds
+            } else {
+              // User already answered - trigger immediate auto-advance
+              setShouldAutoAdvance(true);
+            }
+            return currentIsAnswered || true; // Mark as answered if not already
+          });
           return 0;
         }
         
@@ -207,14 +215,30 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
     };
   }, [gameState]); // Add gameState to dependencies to clean up on state transitions
 
-  // Auto-advance logic after timeout toast
+  // Hide timeout toast after 1 second
   useEffect(() => {
     if (showTimeoutToast) {
-      // Wait 1 second after toast appears
-      const timeoutId = setTimeout(() => {
-        // Reset showTimeoutToast to false
+      const toastTimeoutId = setTimeout(() => {
         setShowTimeoutToast(false);
-        
+        // After hiding toast, trigger auto-advance with delay
+        setShouldAutoAdvance(true);
+      }, 1000);
+      
+      return () => {
+        clearTimeout(toastTimeoutId);
+      };
+    }
+  }, [showTimeoutToast]);
+
+  // Unified auto-advance logic
+  useEffect(() => {
+    if (shouldAutoAdvance) {
+      // Determine delay based on whether user answered or timed out
+      // If selectedOption is null, user timed out → 4 second delay (after 1s toast = 5s total)
+      // If selectedOption exists, user answered → 0ms delay (immediate)
+      const delay = selectedOption === null ? 4000 : 0;
+      
+      const advanceTimeoutId = setTimeout(() => {
         // Check if this is the last question
         if (currentQuestionIndex === questions.length - 1) {
           // Session complete - calculate accuracy and invoke callback
@@ -245,16 +269,16 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
           // Reset question-specific state for the next question
           setSelectedOption(null);
           setIsAnswered(false);
+          setShouldAutoAdvance(false);
           setTimeRemaining(30); // Reset timer for next question
         }
-      }, 1000); // 1 second delay
+      }, delay);
       
-      // Cleanup timeout on component unmount or if showTimeoutToast changes
       return () => {
-        clearTimeout(timeoutId);
+        clearTimeout(advanceTimeoutId);
       };
     }
-  }, [showTimeoutToast, currentQuestionIndex, questions.length, correctAnswers, score, onComplete]);
+  }, [shouldAutoAdvance, selectedOption, currentQuestionIndex, questions.length, correctAnswers, score, highScore, onComplete]);
 
   // Option click handler
   const handleOptionClick = (optionId: string) => {
