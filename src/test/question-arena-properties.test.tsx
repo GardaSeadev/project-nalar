@@ -253,10 +253,25 @@ describe('QuestionArena Property-Based Tests', () => {
 
           // Create mock callback function
           const mockOnComplete = vi.fn();
+          let nextHandler: (() => void) | null = null;
+          let isAnswered = false;
 
           // Render component with generated questions and mock callback
-          const { container, unmount } = render(
-            <QuestionArena questions={questions} onComplete={mockOnComplete} />
+          const { container, unmount, rerender } = render(
+            <div>
+              <QuestionArena 
+                questions={questions} 
+                onComplete={mockOnComplete}
+                renderNextButton={(handleNext, answered) => {
+                  nextHandler = handleNext;
+                  isAnswered = answered;
+                  return null;
+                }}
+              />
+              {isAnswered && (
+                <button onClick={() => nextHandler?.()}>Next Question</button>
+              )}
+            </div>
           );
 
           // Calculate expected score and correct answers
@@ -293,6 +308,24 @@ describe('QuestionArena Property-Based Tests', () => {
               expectedScore += 20;
               expectedCorrectAnswers += 1;
             }
+
+            // Rerender to show the Next button after answering
+            rerender(
+              <div>
+                <QuestionArena 
+                  questions={questions} 
+                  onComplete={mockOnComplete}
+                  renderNextButton={(handleNext, answered) => {
+                    nextHandler = handleNext;
+                    isAnswered = answered;
+                    return null;
+                  }}
+                />
+                {isAnswered && (
+                  <button onClick={() => nextHandler?.()}>Next Question</button>
+                )}
+              </div>
+            );
 
             // Find the Next button by looking for button with "Next Question" text
             const allButtons = Array.from(container.querySelectorAll('button'));

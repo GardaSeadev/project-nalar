@@ -149,7 +149,7 @@ describe('Leaderboard Component Unit Tests', () => {
     expect(title).toHaveClass('text-white');
 
     // Verify entry styling
-    const entryRow = document.querySelector('.flex.justify-between.items-center.py-3.border-b.border-white\\/10');
+    const entryRow = document.querySelector('.flex.justify-between.items-center.py-2.sm\\:py-3.border-b.border-white\\/10');
     expect(entryRow).toBeInTheDocument();
 
     // Verify rank badge styling

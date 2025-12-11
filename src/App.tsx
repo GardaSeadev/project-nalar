@@ -39,6 +39,7 @@ function App() {
   // State for tracking final results to display in FINISHED state
   const [finalScore, setFinalScore] = useState<number>(0)
   const [finalAccuracy, setFinalAccuracy] = useState<number>(0)
+  const [isNewHighScore, setIsNewHighScore] = useState<boolean>(false)
 
   // Load user progress from localStorage on mount
   useEffect(() => {
@@ -82,6 +83,7 @@ function App() {
     setCurrentScore(0);
     setCurrentStreakInGame(0);
     setIsAnswered(false);
+    setIsNewHighScore(false);
     nextButtonHandlerRef.current = null;
     setGameState('PLAYING')
   }
@@ -95,6 +97,10 @@ function App() {
     // Store final results for display in FINISHED state
     setFinalScore(score)
     setFinalAccuracy(accuracy)
+    
+    // Check if this is a new high score
+    const isNewHigh = score > highScore
+    setIsNewHighScore(isNewHigh)
     
     // Load current progress to get lastPlayedDate
     const currentProgress = loadUserProgress()
@@ -215,36 +221,36 @@ function App() {
         <div className="min-h-screen flex items-center justify-center px-4">
           <BackgroundGradient />
           <motion.div 
-            className="max-w-2xl w-full backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-12"
+            className="max-w-2xl w-full backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-6 sm:p-12"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
           >
           {/* App Title */}
-          <div className="text-center mb-12">
-            <h1 className="text-6xl font-bold text-white text-center mb-4">
+          <div className="text-center mb-6 sm:mb-12">
+            <h1 className="text-4xl sm:text-6xl font-bold text-white text-center mb-4">
               Project NALAR
             </h1>
-            <p className="text-xl text-slate-300 text-center">
+            <p className="text-lg sm:text-xl text-slate-300 text-center">
               Academic Potential Test Practice
             </p>
           </div>
 
           {/* High Score and Streak Display - Bento Grid */}
-          <div className="grid grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <motion.div 
-              className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6 text-center"
+              className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 text-center min-h-[88px]"
               whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.2)" }}
             >
               <p className="text-sm text-slate-400 mb-2">High Score</p>
-              <p className="text-4xl font-bold text-indigo-400">{highScore} XP</p>
+              <p className="text-3xl sm:text-4xl font-bold text-indigo-400">{highScore} XP</p>
             </motion.div>
             <motion.div 
-              className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6 text-center"
+              className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 text-center min-h-[88px]"
               whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.2)" }}
             >
               <p className="text-sm text-slate-400 mb-2">Current Streak</p>
-              <p className="text-4xl font-bold text-orange-400">🔥 {currentStreak}</p>
+              <p className="text-3xl sm:text-4xl font-bold text-orange-400">🔥 {currentStreak}</p>
             </motion.div>
           </div>
 
@@ -255,7 +261,7 @@ function App() {
           <motion.button
             onClick={handleStartQuiz}
             disabled={isLoadingQuestions}
-            className="w-full py-6 bg-indigo-600 text-white rounded-2xl font-bold text-2xl shadow-lg shadow-indigo-500/50 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-3"
+            className="w-full py-4 sm:py-6 bg-indigo-600 text-white rounded-2xl font-bold text-xl sm:text-2xl shadow-lg shadow-indigo-500/50 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-3 min-h-[56px]"
             whileHover={!isLoadingQuestions ? { scale: 1.05, boxShadow: "0 0 40px rgba(99, 102, 241, 0.8)" } : {}}
             whileTap={!isLoadingQuestions ? { scale: 0.95 } : {}}
           >
@@ -362,7 +368,7 @@ function App() {
             
             {/* SINGLE Quit Button - Top Right */}
             <motion.button
-              className="px-4 sm:px-6 py-2 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg font-semibold text-sm sm:text-base"
+              className="px-4 sm:px-6 py-3 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] min-w-[44px]"
               whileHover={{ scale: 1.05, backgroundColor: "rgba(239, 68, 68, 0.3)" }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleQuit(currentScore)}
@@ -400,7 +406,7 @@ function App() {
             <motion.button
               disabled={!isAnswered}
               onClick={() => nextButtonHandlerRef.current?.()}
-              className={`flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg ${
+              className={`flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg min-h-[44px] ${
                 isAnswered
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50'
                   : 'bg-white/5 text-slate-500 cursor-not-allowed'
@@ -464,7 +470,7 @@ function App() {
             },
           }}
         />
-        <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="h-screen flex items-center justify-center p-2 sm:p-4">
           <BackgroundGradient />
         
         {/* Summary Card will be rendered here by QuestionArena */}
@@ -476,6 +482,7 @@ function App() {
           gameState={gameState}
           finalScore={finalScore}
           finalAccuracy={finalAccuracy}
+          isNewHighScore={isNewHighScore}
           onRefreshLeaderboard={refreshLeaderboard}
         />
         </div>

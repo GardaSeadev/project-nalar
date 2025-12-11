@@ -48,12 +48,20 @@ describe('Leaderboard Property-Based Tests', () => {
         // For each entry, verify that rank, username, and score are displayed
         // Get all entry rows
         const entryRows = screen.getAllByRole('generic').filter(el => 
-          el.className.includes('flex justify-between items-center py-3')
+          el.className.includes('flex justify-between items-center') && 
+          el.className.includes('py-2')
         );
+        
+        // Ensure we have the expected number of entry rows
+        expect(entryRows.length).toBe(entries.length);
         
         entries.forEach((entry, index) => {
           const rank = index + 1;
           const entryRow = entryRows[index];
+          
+          // Ensure the entry row exists
+          expect(entryRow).toBeDefined();
+          expect(entryRow.textContent).toBeDefined();
           
           // Check that rank number is displayed in this row
           expect(entryRow.textContent).toContain(rank.toString());

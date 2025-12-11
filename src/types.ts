@@ -43,6 +43,7 @@ export interface QuestionArenaProps {
   onStreakChange?: (streak: number) => void;  // Optional callback when streak changes
   finalScore?: number;  // Optional final score to display in FINISHED state
   finalAccuracy?: number;  // Optional final accuracy to display in FINISHED state
+  isNewHighScore?: boolean;  // Optional flag to indicate if this is a new high score
   renderNextButton?: (handleNext: () => void, isAnswered: boolean) => React.ReactNode;  // Optional render prop for Next button
   onRefreshLeaderboard?: () => void;  // Optional callback to refresh leaderboard after score submission
 }

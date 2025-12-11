@@ -22,7 +22,7 @@ describe('App Integration', () => {
     
     // Wait for questions to load first
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     });
     
     // Verify app title is present in Lobby
@@ -40,11 +40,11 @@ describe('App Integration', () => {
     
     // Wait for questions to load
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     });
     
     // Click the start button
-    const startButton = screen.getByText('MULAI TES');
+    const startButton = screen.getByText('START MISSION');
     await user.click(startButton);
     
     // Verify we're now in PLAYING state by checking for QuestionArena elements
@@ -61,7 +61,7 @@ describe('App Integration', () => {
     
     // Wait for questions to load
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     });
     
     // The callback is defined and will be called when session completes
@@ -126,7 +126,7 @@ describe('App Integration', () => {
 
     // VERIFY INITIAL STATE: IDLE
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     expect(screen.getByText('Project NALAR')).toBeInTheDocument();
@@ -134,7 +134,7 @@ describe('App Integration', () => {
     expect(screen.getByText('Current Streak')).toBeInTheDocument();
 
     // TRANSITION: IDLE → PLAYING
-    await user.click(screen.getByText('MULAI TES'));
+    await user.click(screen.getByText('START MISSION'));
 
     // VERIFY STATE: PLAYING
     await waitFor(() => {
@@ -142,7 +142,7 @@ describe('App Integration', () => {
     }, { timeout: 3000 });
 
     // Verify IDLE state elements are NOT present
-    expect(screen.queryByText('MULAI TES')).not.toBeInTheDocument();
+    expect(screen.queryByText('START MISSION')).not.toBeInTheDocument();
 
     // COMPLETE QUESTION 1
     const option1 = await screen.findByText(/^A\./, {}, { timeout: 3000 });
@@ -227,14 +227,14 @@ describe('App Integration', () => {
 
     // Wait for IDLE state
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // Verify initial userXP is 0
     expect(screen.getByText('0 XP')).toBeInTheDocument();
 
     // Transition to PLAYING
-    await user.click(screen.getByText('MULAI TES'));
+    await user.click(screen.getByText('START MISSION'));
 
     // Wait for PLAYING state
     await waitFor(() => {
@@ -259,7 +259,7 @@ describe('App Integration', () => {
 
     // Verify we're back in IDLE state
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // Verify userXP was updated to 20 (from localStorage)
@@ -292,7 +292,7 @@ describe('Complete User Flow Integration Tests', () => {
   });
 
   /**
-   * Test: Complete flow from IDLE → Start → Answer questions → FINISHED → Try Again → IDLE
+   * Test: Complete flow from IDLE → Start → Answer questions → FINISHED → Play Again → IDLE
    * Validates: Requirements 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 12.1, 12.5, 12.6
    * 
    * This test verifies the complete happy path through the application:
@@ -300,7 +300,7 @@ describe('Complete User Flow Integration Tests', () => {
    * 2. User clicks start button to enter PLAYING state
    * 3. User answers all questions
    * 4. User sees FINISHED state (Summary Card)
-   * 5. User clicks Try Again to return to IDLE state
+   * 5. User clicks Play Again to return to IDLE state
    */
   it('should complete full flow: IDLE → PLAYING → FINISHED → IDLE', async () => {
     const user = userEvent.setup();
@@ -308,7 +308,7 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 1: Verify IDLE state (Lobby Screen)
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     expect(screen.getByText('Project NALAR')).toBeInTheDocument();
@@ -316,14 +316,14 @@ describe('Complete User Flow Integration Tests', () => {
     expect(screen.getByText('Current Streak')).toBeInTheDocument();
 
     // STEP 2: Transition to PLAYING state
-    await user.click(screen.getByText('MULAI TES'));
+    await user.click(screen.getByText('START MISSION'));
 
     await waitFor(() => {
       expect(screen.getByText(/Question 1 of 3/i)).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // Verify IDLE elements are gone
-    expect(screen.queryByText('MULAI TES')).not.toBeInTheDocument();
+    expect(screen.queryByText('START MISSION')).not.toBeInTheDocument();
 
     // STEP 3: Answer all questions
     // Answer Question 1 (correctly)
@@ -372,18 +372,18 @@ describe('Complete User Flow Integration Tests', () => {
 
     // Verify Summary Card elements
     await waitFor(() => {
-      expect(screen.getByText(/Try Again/i)).toBeInTheDocument();
+      expect(screen.getByText(/Play Again/i)).toBeInTheDocument();
     }, { timeout: 3000 });
 
     expect(screen.getByText(/Final Score/i)).toBeInTheDocument();
     expect(screen.getByText(/Accuracy/i)).toBeInTheDocument();
     expect(screen.getByText(/Correct Answers/i)).toBeInTheDocument();
 
-    // STEP 5: Click Try Again to return to IDLE
-    await user.click(screen.getByText(/Try Again/i));
+    // STEP 5: Click Play Again to return to IDLE
+    await user.click(screen.getByText(/Play Again/i));
 
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // Verify we're back in IDLE state
@@ -412,7 +412,7 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 1: Start in IDLE state
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // Verify initial userXP is 0
@@ -420,7 +420,7 @@ describe('Complete User Flow Integration Tests', () => {
     expect(initialHighScore).toBeInTheDocument();
 
     // STEP 2: Transition to PLAYING
-    await user.click(screen.getByText('MULAI TES'));
+    await user.click(screen.getByText('START MISSION'));
 
     await waitFor(() => {
       expect(screen.getByText(/Question 1 of 3/i)).toBeInTheDocument();
@@ -455,7 +455,7 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 5: Verify return to IDLE state
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // STEP 6: Verify XP was saved to localStorage
@@ -484,11 +484,11 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 1: Start in IDLE state
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // STEP 2: Transition to PLAYING
-    await user.click(screen.getByText('MULAI TES'));
+    await user.click(screen.getByText('START MISSION'));
 
     await waitFor(() => {
       expect(screen.getByText(/Question 1 of 3/i)).toBeInTheDocument();
@@ -543,7 +543,7 @@ describe('Complete User Flow Integration Tests', () => {
 
     // Verify Summary Card appears
     await waitFor(() => {
-      expect(screen.getByText(/Try Again/i)).toBeInTheDocument();
+      expect(screen.getByText(/Play Again/i)).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // Verify score reflects all correct answers
@@ -578,14 +578,14 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 1: Start in IDLE state
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // Verify initial high score is displayed
     expect(screen.getByText('20 XP')).toBeInTheDocument();
 
     // STEP 2: Start quiz
-    await user.click(screen.getByText('MULAI TES'));
+    await user.click(screen.getByText('START MISSION'));
 
     await waitFor(() => {
       expect(screen.getByText(/Question 1 of 3/i)).toBeInTheDocument();
@@ -617,7 +617,7 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 5: Wait for Summary Card to appear
     await waitFor(() => {
-      expect(screen.getByText(/Try Again/i)).toBeInTheDocument();
+      expect(screen.getByText(/Play Again/i)).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // STEP 6: Verify "New High Score!" indicator is present
@@ -658,7 +658,7 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 1: Verify initial streak is displayed
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // Current streak should still show 5 (not updated until quiz completes)
@@ -669,7 +669,7 @@ describe('Complete User Flow Integration Tests', () => {
     })).toBeInTheDocument();
 
     // STEP 2: Start and complete quiz
-    await user.click(screen.getByText('MULAI TES'));
+    await user.click(screen.getByText('START MISSION'));
 
     await waitFor(() => {
       expect(screen.getByText(/Question 1 of 3/i)).toBeInTheDocument();
@@ -696,7 +696,7 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 3: Wait for Summary Card to appear (quiz is complete)
     await waitFor(() => {
-      expect(screen.getByText(/Try Again/i)).toBeInTheDocument();
+      expect(screen.getByText(/Play Again/i)).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // STEP 4: Verify streak was incremented in localStorage
@@ -736,10 +736,10 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 1: Start quiz
     await waitFor(() => {
-      expect(screen.getByText('MULAI TES')).toBeInTheDocument();
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
     }, { timeout: 3000 });
 
-    await user.click(screen.getByText('MULAI TES'));
+    await user.click(screen.getByText('START MISSION'));
 
     await waitFor(() => {
       expect(screen.getByText(/Question 1 of 3/i)).toBeInTheDocument();
@@ -766,7 +766,7 @@ describe('Complete User Flow Integration Tests', () => {
 
     // STEP 3: Wait for Summary Card to appear (quiz is complete)
     await waitFor(() => {
-      expect(screen.getByText(/Try Again/i)).toBeInTheDocument();
+      expect(screen.getByText(/Play Again/i)).toBeInTheDocument();
     }, { timeout: 3000 });
 
     // STEP 4: Verify streak was reset to 1 in localStorage

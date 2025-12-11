@@ -44,17 +44,25 @@ export const questionDataArbitrary: fc.Arbitrary<QuestionData> = fc
   });
 
 /**
+ * Generator for valid usernames (non-empty strings, 1-50 characters)
+ * Filters out strings that are only whitespace
+ */
+export const usernameArbitrary: fc.Arbitrary<string> = fc
+  .string({ minLength: 1, maxLength: 50 })
+  .filter(s => s.trim().length > 0);
+
+/**
  * Generator for valid leaderboard entries
  * Ensures:
  * - Valid ID (positive integer)
- * - Non-empty username (1-50 characters)
+ * - Non-empty username (1-50 characters, no whitespace-only)
  * - Non-negative score
  * - Optional accuracy (0-100)
  * - Valid ISO timestamp
  */
 export const leaderboardEntryArbitrary: fc.Arbitrary<LeaderboardEntry> = fc.record({
   id: fc.integer({ min: 1, max: 10000 }),
-  username: fc.string({ minLength: 1, maxLength: 50 }),
+  username: usernameArbitrary,
   score: fc.integer({ min: 0, max: 1000 }),
   accuracy: fc.option(fc.integer({ min: 0, max: 100 })),
   created_at: fc.date().map(d => d.toISOString()),
@@ -73,14 +81,6 @@ export const leaderboardArrayArbitrary: fc.Arbitrary<LeaderboardEntry[]> = fc
       id: index + 1,
     }));
   });
-
-/**
- * Generator for valid usernames (non-empty strings, 1-50 characters)
- * Filters out strings that are only whitespace
- */
-export const usernameArbitrary: fc.Arbitrary<string> = fc
-  .string({ minLength: 1, maxLength: 50 })
-  .filter(s => s.trim().length > 0);
 
 /**
  * Generator for scores (non-negative integers)

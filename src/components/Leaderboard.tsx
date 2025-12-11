@@ -34,11 +34,11 @@ export default function Leaderboard({ onRefresh }: LeaderboardProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h2 className="text-2xl font-bold text-white mb-4">Top 5 Players Today</h2>
+      <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">Top 5 Players Today</h2>
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex justify-between items-center py-3 border-b border-white/10">
+            <div key={i} className="flex justify-between items-center py-3 border-b border-white/10 min-h-[44px]">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
                 <div className="w-32 h-4 bg-white/10 rounded animate-pulse" />
@@ -54,13 +54,13 @@ export default function Leaderboard({ onRefresh }: LeaderboardProps) {
   // Error state
   if (error) {
     return (
-      <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h2 className="text-2xl font-bold text-white mb-4">Top 5 Players Today</h2>
+      <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">Top 5 Players Today</h2>
         <div className="text-center py-8">
           <p className="text-slate-400 mb-4">{error}</p>
           <button
             onClick={loadLeaderboard}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors min-h-[44px]"
           >
             Retry
           </button>
@@ -72,8 +72,8 @@ export default function Leaderboard({ onRefresh }: LeaderboardProps) {
   // Empty state
   if (entries.length === 0) {
     return (
-      <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h2 className="text-2xl font-bold text-white mb-4">Top 5 Players Today</h2>
+      <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">Top 5 Players Today</h2>
         <div className="text-center py-8">
           <p className="text-slate-400 text-lg">Be the first to set a score!</p>
           <p className="text-slate-500 text-sm mt-2">Complete a quiz to appear on the leaderboard</p>
@@ -84,21 +84,21 @@ export default function Leaderboard({ onRefresh }: LeaderboardProps) {
 
   // Success state - display leaderboard entries
   return (
-    <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-6">
-      <h2 className="text-2xl font-bold text-white mb-4">Top 5 Players Today</h2>
+    <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8">
+      <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">Top 5 Players Today</h2>
       <div className="space-y-0">
         {entries.map((entry, index) => (
           <div
             key={entry.id}
-            className="flex justify-between items-center py-3 border-b border-white/10 last:border-b-0"
+            className="flex justify-between items-center py-2 sm:py-3 border-b border-white/10 last:border-b-0 min-h-[44px]"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-sm">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs sm:text-sm">
                 {index + 1}
               </div>
-              <span className="text-white font-medium text-base">{entry.username}</span>
+              <span className="text-white font-medium text-sm sm:text-base">{entry.username}</span>
             </div>
-            <span className="text-indigo-400 font-bold text-lg">{entry.score} XP</span>
+            <span className="text-indigo-400 font-bold text-base sm:text-lg">{entry.score} XP</span>
           </div>
         ))}
       </div>

@@ -49,9 +49,9 @@ export default function ScoreSubmissionForm({ score, accuracy, onSuccess }: Scor
   const isUsernameValid = username.trim().length > 0 && username.length <= 50;
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto space-y-4">
+    <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto space-y-4 sm:space-y-6">
       <div>
-        <label htmlFor="username" className="block text-white text-sm font-medium mb-2">
+        <label htmlFor="username" className="block text-white text-sm sm:text-base font-medium mb-2">
           Enter your Name to save Score
         </label>
         <input
@@ -62,11 +62,12 @@ export default function ScoreSubmissionForm({ score, accuracy, onSuccess }: Scor
           placeholder="Enter your name"
           maxLength={50}
           disabled={isSubmitting}
-          className="w-full px-4 py-3 backdrop-blur-lg bg-white/10 border border-white/20 
+          className="w-full px-4 py-3 sm:py-4 backdrop-blur-lg bg-white/10 border border-white/20 
                      rounded-xl text-white placeholder-slate-400 focus:outline-none 
                      focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/50
                      disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-all duration-200"
+                     transition-all duration-200 text-base sm:text-lg
+                     min-h-[48px]"
           aria-label="Enter your username"
         />
       </div>
@@ -74,9 +75,10 @@ export default function ScoreSubmissionForm({ score, accuracy, onSuccess }: Scor
       <button
         type="submit"
         disabled={!isUsernameValid || isSubmitting}
-        className="w-full px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold
+        className="w-full px-6 py-3 sm:py-4 bg-indigo-600 text-white rounded-xl font-semibold
                    hover:bg-indigo-700 disabled:bg-gray-500 disabled:cursor-not-allowed
-                   transition-all duration-200 flex items-center justify-center gap-2"
+                   transition-all duration-200 flex items-center justify-center gap-2
+                   min-h-[48px] text-base sm:text-lg"
       >
         {isSubmitting ? (
           <>
@@ -92,7 +94,7 @@ export default function ScoreSubmissionForm({ score, accuracy, onSuccess }: Scor
       </button>
 
       {submitError && (
-        <p className="text-red-400 text-sm text-center" role="alert">
+        <p className="text-red-400 text-sm sm:text-base text-center" role="alert">
           {submitError}
         </p>
       )}

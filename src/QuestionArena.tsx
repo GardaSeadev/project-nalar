@@ -103,7 +103,7 @@ function triggerConfetti(): void {
  * An interactive quiz component that displays a multiple-choice question
  * with immediate feedback, explanations, and a countdown timer.
  */
-export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0, gameState, onQuestionIndexChange, onScoreChange, onStreakChange, finalScore: propFinalScore, finalAccuracy: propFinalAccuracy, renderNextButton, onRefreshLeaderboard }: QuestionArenaProps) {
+export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0, gameState, onQuestionIndexChange, onScoreChange, onStreakChange, finalScore: propFinalScore, finalAccuracy: propFinalAccuracy, isNewHighScore: propIsNewHighScore, renderNextButton, onRefreshLeaderboard }: QuestionArenaProps) {
   // Session management state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
@@ -438,13 +438,14 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
     const displayCorrectAnswers = propFinalAccuracy !== undefined 
       ? Math.round((propFinalAccuracy / 100) * questions.length) 
       : correctAnswers;
+    const displayIsNewHighScore = propIsNewHighScore !== undefined ? propIsNewHighScore : isNewHighScore;
     
     // Calculate rank based on final score
     const rank = calculateRank(displayScore);
 
     return (
       <motion.div 
-        className="max-w-4xl mx-auto backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-12"
+        className="w-full max-w-4xl mx-auto backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-8 md:p-12"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
@@ -452,82 +453,82 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
         <div className="text-center">
           {/* Trophy Icon - Animated with Glassmorphic Glow */}
           <motion.div 
-            className="flex justify-center mb-8"
+            className="flex justify-center mb-3 sm:mb-4"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
           >
-            <div className={`p-8 rounded-full ${getTrophyGlowClasses(displayAccuracy)}`}>
+            <div className={`p-3 sm:p-4 md:p-5 rounded-full ${getTrophyGlowClasses(displayAccuracy)}`}>
               <Trophy 
-                size={80} 
-                className={getTrophyColorClasses(displayAccuracy)} 
+                size={40} 
+                className={`sm:w-12 sm:h-12 md:w-16 md:h-16 ${getTrophyColorClasses(displayAccuracy)}`} 
               />
             </div>
           </motion.div>
 
           {/* Rank Badge - Large and Glowing */}
           <motion.div 
-            className="flex justify-center mb-6"
+            className="flex justify-center mb-3 sm:mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <div className={`px-12 py-6 rounded-3xl text-4xl font-bold border-2 ${getRankGlowClasses(rank)}`}>
+            <div className={`px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-xl sm:rounded-2xl text-base sm:text-xl md:text-2xl font-bold border-2 min-h-[40px] sm:min-h-[48px] flex items-center justify-center ${getRankGlowClasses(rank)}`}>
               {rank}
             </div>
           </motion.div>
 
           {/* New High Score Indicator */}
-          {isNewHighScore && (
-            <div className="mb-4">
-              <p className="text-2xl font-bold text-yellow-600">
+          {displayIsNewHighScore && (
+            <div className="mb-2 sm:mb-3">
+              <p className="text-lg sm:text-xl font-bold text-yellow-600">
                 🎉 New High Score!
               </p>
             </div>
           )}
 
           {/* Title */}
-          <h2 className="text-2xl sm:text-4xl font-bold text-white text-center mb-3 sm:mb-4">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-white text-center mb-1 sm:mb-2">
             {displayAccuracy >= 80 ? 'Excellent Work!' : displayAccuracy >= 60 ? 'Good Job!' : 'Keep Practicing!'}
           </h2>
-          <p className="text-slate-300 text-center text-base sm:text-lg mb-8 sm:mb-12">You've completed all questions</p>
+          <p className="text-slate-300 text-center text-xs sm:text-sm md:text-base mb-4 sm:mb-6">You've completed all questions</p>
 
           {/* Stats Grid - Responsive: 1 column on mobile, 3 on desktop */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-5">
             {/* Final Score */}
             <motion.div 
-              className="backdrop-blur-lg bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-6 sm:p-8 text-center"
+              className="backdrop-blur-lg bg-indigo-500/10 border border-indigo-500/30 rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-5 text-center min-h-[60px] sm:min-h-[70px]"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
               whileHover={{ scale: 1.05, borderColor: "rgba(99, 102, 241, 0.5)" }}
             >
-              <p className="text-xs sm:text-sm font-semibold text-indigo-300 mb-2 sm:mb-3">Final Score</p>
-              <p className="text-4xl sm:text-5xl font-bold text-indigo-400">{displayScore} XP</p>
+              <p className="text-xs sm:text-sm font-semibold text-indigo-300 mb-1">Final Score</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-indigo-400">{displayScore} XP</p>
             </motion.div>
 
             {/* Accuracy */}
             <motion.div 
-              className="backdrop-blur-lg bg-green-500/10 border border-green-500/30 rounded-2xl p-6 sm:p-8 text-center"
+              className="backdrop-blur-lg bg-green-500/10 border border-green-500/30 rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-5 text-center min-h-[60px] sm:min-h-[70px]"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
               whileHover={{ scale: 1.05, borderColor: "rgba(34, 197, 94, 0.5)" }}
             >
-              <p className="text-xs sm:text-sm font-semibold text-green-300 mb-2 sm:mb-3">Accuracy</p>
-              <p className="text-4xl sm:text-5xl font-bold text-green-400">{displayAccuracy.toFixed(0)}%</p>
+              <p className="text-xs sm:text-sm font-semibold text-green-300 mb-1">Accuracy</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-green-400">{displayAccuracy.toFixed(0)}%</p>
             </motion.div>
 
             {/* Correct Count */}
             <motion.div 
-              className="backdrop-blur-lg bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 sm:p-8 text-center"
+              className="backdrop-blur-lg bg-blue-500/10 border border-blue-500/30 rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-5 text-center min-h-[60px] sm:min-h-[70px]"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
               whileHover={{ scale: 1.05, borderColor: "rgba(59, 130, 246, 0.5)" }}
             >
-              <p className="text-xs sm:text-sm font-semibold text-blue-300 mb-2 sm:mb-3">Correct Answers</p>
-              <p className="text-4xl sm:text-5xl font-bold text-blue-400">
+              <p className="text-xs sm:text-sm font-semibold text-blue-300 mb-1">Correct Answers</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-400">
                 {displayCorrectAnswers}/{questions.length}
               </p>
             </motion.div>
@@ -536,7 +537,7 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
           {/* Score Submission Form */}
           {onRefreshLeaderboard && (
             <motion.div
-              className="mb-8"
+              className="mb-3 sm:mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.0 }}
@@ -552,7 +553,7 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
           {/* Play Again Button */}
           <motion.button
             onClick={handleTryAgain}
-            className="w-full py-4 sm:py-6 bg-indigo-600 text-white rounded-2xl font-bold text-xl sm:text-2xl shadow-lg shadow-indigo-500/50 flex items-center justify-center gap-2 sm:gap-3"
+            className="w-full py-2 sm:py-3 md:py-4 bg-indigo-600 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg md:text-xl shadow-lg shadow-indigo-500/50 flex items-center justify-center gap-2 min-h-[44px] sm:min-h-[48px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.1 }}
@@ -619,7 +620,7 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
 
         {/* Right: Timer */}
         <div
-          className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg backdrop-blur-lg ${
+          className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg backdrop-blur-lg min-h-[44px] ${
             timeRemaining <= 10 
               ? 'bg-red-500/20 border border-red-500/50 text-red-400' 
               : 'bg-white/5 border border-white/10 text-slate-300'
