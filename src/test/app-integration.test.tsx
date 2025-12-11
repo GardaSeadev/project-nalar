@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import App from '../App';
 import * as supabaseClient from '../supabaseClient';
 import { mockQuestions } from '../mockData';
+import type { LeaderboardEntry } from '../types';
 
 /**
  * Integration test for App component with game state machine
@@ -775,4 +776,447 @@ describe('Complete User Flow Integration Tests', () => {
     // Clean up
     unmount();
   }, 30000); // 30 second timeout
+});
+
+/**
+ * Integration Tests for Complete Leaderboard Flow
+ * Task 7: Write integration tests for complete leaderboard flow
+ * Requirements: 1.1, 1.2, 2.3, 2.5
+ * 
+ * These tests verify the complete leaderboard integration with the quiz flow,
+ * including viewing leaderboard, completing quiz, submitting score, and seeing updates.
+ */
+describe('Leaderboard Integration Tests', () => {
+  beforeEach(() => {
+    // Clear localStorage before each test
+    localStorage.clear();
+    
+    // Mock Supabase to return test questions
+    vi.spyOn(supabaseClient, 'fetchQuestionsFromSupabase').mockResolvedValue(mockQuestions.slice(0, 3));
+  });
+
+  /**
+   * Test: Complete flow - view leaderboard → complete quiz → submit score → see updated leaderboard
+   * Validates: Requirements 1.1, 1.2, 2.3, 2.5
+   * 
+   * This test verifies the complete user journey:
+   * 1. User views leaderboard in lobby (IDLE state)
+   * 2. User completes quiz
+   * 3. User submits score with username
+   * 4. Leaderboard refreshes and shows updated rankings
+   */
+  it('should complete full leaderboard flow: view → quiz → submit → refresh', async () => {
+    const user = userEvent.setup();
+
+    // Mock initial leaderboard data
+    const initialLeaderboard: LeaderboardEntry[] = [
+      { id: 1, username: 'Alice', score: 100, created_at: '2024-12-09T10:00:00Z' },
+      { id: 2, username: 'Bob', score: 90, created_at: '2024-12-09T09:00:00Z' },
+      { id: 3, username: 'Charlie', score: 80, created_at: '2024-12-09T08:00:00Z' },
+    ];
+
+    // Mock updated leaderboard data (after submission)
+    const updatedLeaderboard: LeaderboardEntry[] = [
+      { id: 4, username: 'TestPlayer', score: 60, created_at: '2024-12-09T11:00:00Z' },
+      { id: 1, username: 'Alice', score: 100, created_at: '2024-12-09T10:00:00Z' },
+      { id: 2, username: 'Bob', score: 90, created_at: '2024-12-09T09:00:00Z' },
+      { id: 3, username: 'Charlie', score: 80, created_at: '2024-12-09T08:00:00Z' },
+    ];
+
+    // Mock fetchTopLeaderboard to return initial data, then updated data
+    const fetchLeaderboardMock = vi.spyOn(supabaseClient, 'fetchTopLeaderboard')
+      .mockResolvedValueOnce(initialLeaderboard)
+      .mockResolvedValueOnce(updatedLeaderboard);
+
+    // Mock submitScore to succeed
+    const submitScoreMock = vi.spyOn(supabaseClient, 'submitScore').mockResolvedValue();
+
+    const { unmount } = render(<App />);
+
+    // STEP 1: Verify IDLE state with leaderboard
+    await waitFor(() => {
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Verify leaderboard is displayed
+    await waitFor(() => {
+      expect(screen.getByText('Top 5 Players Today')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Verify initial leaderboard entries
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('100 XP')).toBeInTheDocument();
+    expect(screen.getByText('Bob')).toBeInTheDocument();
+    expect(screen.getByText('90 XP')).toBeInTheDocument();
+
+    // STEP 2: Start quiz
+    await user.click(screen.getByText('START MISSION'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Question 1 of 3/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // STEP 3: Complete quiz (answer all questions correctly to get 60 XP)
+    const q1OptionC = await screen.findByText(/^C\./, {}, { timeout: 3000 });
+    await user.click(q1OptionC);
+    await user.click(screen.getByText(/Next Question/i));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Question 2 of 3/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+    const q2OptionB = await screen.findByText(/^B\./, {}, { timeout: 3000 });
+    await user.click(q2OptionB);
+    await user.click(screen.getByText(/Next Question/i));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Question 3 of 3/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+    const q3OptionC = await screen.findByText(/^C\./, {}, { timeout: 3000 });
+    await user.click(q3OptionC);
+    await user.click(screen.getByText(/Next Question/i));
+
+    // STEP 4: Wait for FINISHED state (Summary Card)
+    await waitFor(() => {
+      expect(screen.getByText(/Play Again/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Verify score submission form is present
+    expect(screen.getByText('Enter your Name to save Score')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Enter your name')).toBeInTheDocument();
+
+    // STEP 5: Submit score
+    const usernameInput = screen.getByPlaceholderText('Enter your name');
+    await user.type(usernameInput, 'TestPlayer');
+
+    const submitButton = screen.getByText('Save Score');
+    expect(submitButton).not.toBeDisabled();
+    await user.click(submitButton);
+
+    // STEP 6: Verify submitScore was called with correct values
+    await waitFor(() => {
+      expect(submitScoreMock).toHaveBeenCalledWith('TestPlayer', 60, 100);
+    }, { timeout: 3000 });
+
+    // STEP 7: Click Play Again to return to IDLE and see updated leaderboard
+    await user.click(screen.getByText(/Play Again/i));
+
+    await waitFor(() => {
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // STEP 8: Verify leaderboard was refreshed (fetchTopLeaderboard called again)
+    await waitFor(() => {
+      expect(fetchLeaderboardMock).toHaveBeenCalledTimes(2);
+    }, { timeout: 3000 });
+
+    // STEP 9: Verify updated leaderboard shows new entry
+    await waitFor(() => {
+      expect(screen.getByText('TestPlayer')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Clean up
+    fetchLeaderboardMock.mockRestore();
+    submitScoreMock.mockRestore();
+    unmount();
+  }, 40000); // 40 second timeout
+
+  /**
+   * Test: Leaderboard refresh after successful score submission
+   * Validates: Requirements 2.5
+   * 
+   * This test verifies that the leaderboard automatically refreshes
+   * after a successful score submission without requiring page reload.
+   */
+  it('should refresh leaderboard after successful score submission', async () => {
+    const user = userEvent.setup();
+
+    // Mock leaderboard data
+    const initialLeaderboard: LeaderboardEntry[] = [
+      { id: 1, username: 'Player1', score: 50, created_at: '2024-12-09T10:00:00Z' },
+    ];
+
+    const updatedLeaderboard: LeaderboardEntry[] = [
+      { id: 2, username: 'NewPlayer', score: 60, created_at: '2024-12-09T11:00:00Z' },
+      { id: 1, username: 'Player1', score: 50, created_at: '2024-12-09T10:00:00Z' },
+    ];
+
+    // Mock fetchTopLeaderboard to track calls
+    const fetchLeaderboardMock = vi.spyOn(supabaseClient, 'fetchTopLeaderboard')
+      .mockResolvedValueOnce(initialLeaderboard)
+      .mockResolvedValueOnce(updatedLeaderboard);
+
+    // Mock submitScore to succeed
+    const submitScoreMock = vi.spyOn(supabaseClient, 'submitScore').mockResolvedValue();
+
+    const { unmount } = render(<App />);
+
+    // Wait for IDLE state
+    await waitFor(() => {
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Verify initial leaderboard
+    await waitFor(() => {
+      expect(screen.getByText('Player1')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Start and complete quiz
+    await user.click(screen.getByText('START MISSION'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Question 1 of 3/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Answer all questions
+    const q1OptionC = await screen.findByText(/^C\./, {}, { timeout: 3000 });
+    await user.click(q1OptionC);
+    await user.click(screen.getByText(/Next Question/i));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Question 2 of 3/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+    const q2OptionB = await screen.findByText(/^B\./, {}, { timeout: 3000 });
+    await user.click(q2OptionB);
+    await user.click(screen.getByText(/Next Question/i));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Question 3 of 3/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+    const q3OptionC = await screen.findByText(/^C\./, {}, { timeout: 3000 });
+    await user.click(q3OptionC);
+    await user.click(screen.getByText(/Next Question/i));
+
+    // Wait for FINISHED state
+    await waitFor(() => {
+      expect(screen.getByText(/Play Again/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Submit score
+    const usernameInput = screen.getByPlaceholderText('Enter your name');
+    await user.type(usernameInput, 'NewPlayer');
+    await user.click(screen.getByText('Save Score'));
+
+    // Verify submission
+    await waitFor(() => {
+      expect(submitScoreMock).toHaveBeenCalledWith('NewPlayer', 60, 100);
+    }, { timeout: 3000 });
+
+    // Return to IDLE to trigger leaderboard refresh
+    await user.click(screen.getByText(/Play Again/i));
+
+    await waitFor(() => {
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Verify leaderboard was fetched twice (initial + after submission)
+    await waitFor(() => {
+      expect(fetchLeaderboardMock).toHaveBeenCalledTimes(2);
+    }, { timeout: 3000 });
+
+    // Verify updated leaderboard shows new player
+    await waitFor(() => {
+      expect(screen.getByText('NewPlayer')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Clean up
+    fetchLeaderboardMock.mockRestore();
+    submitScoreMock.mockRestore();
+    unmount();
+  }, 40000); // 40 second timeout
+
+  /**
+   * Test: Error handling for network failures during leaderboard fetch
+   * Validates: Requirements 1.2
+   * 
+   * This test verifies that the app handles network failures gracefully
+   * when fetching leaderboard data, showing appropriate error messages.
+   */
+  it('should handle network failures when fetching leaderboard', async () => {
+    // Mock fetchTopLeaderboard to fail
+    const fetchLeaderboardMock = vi.spyOn(supabaseClient, 'fetchTopLeaderboard')
+      .mockRejectedValue(new Error('Network error'));
+
+    const { unmount } = render(<App />);
+
+    // Wait for IDLE state
+    await waitFor(() => {
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Verify error message is displayed
+    await waitFor(() => {
+      expect(screen.getByText('Unable to load leaderboard. Please try again later.')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Verify retry button is present
+    expect(screen.getByText('Retry')).toBeInTheDocument();
+
+    // Verify app is still functional (start button works)
+    expect(screen.getByText('START MISSION')).not.toBeDisabled();
+
+    // Clean up
+    fetchLeaderboardMock.mockRestore();
+    unmount();
+  }, 20000); // 20 second timeout
+
+  /**
+   * Test: Error handling for network failures during score submission
+   * Validates: Requirements 2.3
+   * 
+   * This test verifies that the app handles network failures gracefully
+   * when submitting scores, showing error messages and allowing retry.
+   */
+  it('should handle network failures when submitting score', async () => {
+    const user = userEvent.setup();
+
+    // Mock leaderboard to succeed
+    const mockLeaderboard: LeaderboardEntry[] = [
+      { id: 1, username: 'Player1', score: 50, created_at: '2024-12-09T10:00:00Z' },
+    ];
+    vi.spyOn(supabaseClient, 'fetchTopLeaderboard').mockResolvedValue(mockLeaderboard);
+
+    // Mock submitScore to fail
+    const submitScoreMock = vi.spyOn(supabaseClient, 'submitScore')
+      .mockRejectedValue(new Error('Network error'));
+
+    const { unmount } = render(<App />);
+
+    // Wait for IDLE state
+    await waitFor(() => {
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Start and complete quiz
+    await user.click(screen.getByText('START MISSION'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Question 1 of 3/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Answer all questions
+    const q1OptionC = await screen.findByText(/^C\./, {}, { timeout: 3000 });
+    await user.click(q1OptionC);
+    await user.click(screen.getByText(/Next Question/i));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Question 2 of 3/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+    const q2OptionB = await screen.findByText(/^B\./, {}, { timeout: 3000 });
+    await user.click(q2OptionB);
+    await user.click(screen.getByText(/Next Question/i));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Question 3 of 3/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+    const q3OptionC = await screen.findByText(/^C\./, {}, { timeout: 3000 });
+    await user.click(q3OptionC);
+    await user.click(screen.getByText(/Next Question/i));
+
+    // Wait for FINISHED state
+    await waitFor(() => {
+      expect(screen.getByText(/Play Again/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Attempt to submit score
+    const usernameInput = screen.getByPlaceholderText('Enter your name');
+    await user.type(usernameInput, 'TestPlayer');
+    await user.click(screen.getByText('Save Score'));
+
+    // Verify error message is displayed (check for the form error specifically)
+    await waitFor(() => {
+      const errorMessages = screen.getAllByText('Failed to save score. Please try again.');
+      // Should have at least one error message (could be toast + form error)
+      expect(errorMessages.length).toBeGreaterThan(0);
+    }, { timeout: 3000 });
+
+    // Verify submit button is still enabled for retry
+    const submitButton = screen.getByText('Save Score');
+    expect(submitButton).not.toBeDisabled();
+
+    // Verify username is preserved for retry
+    expect((usernameInput as HTMLInputElement).value).toBe('TestPlayer');
+
+    // Clean up
+    submitScoreMock.mockRestore();
+    unmount();
+  }, 40000); // 40 second timeout
+
+  /**
+   * Test: Empty leaderboard state
+   * Validates: Requirements 1.1
+   * 
+   * This test verifies that the app displays an appropriate empty state
+   * when no leaderboard entries exist.
+   */
+  it('should display empty state when leaderboard has no entries', async () => {
+    // Mock fetchTopLeaderboard to return empty array
+    const fetchLeaderboardMock = vi.spyOn(supabaseClient, 'fetchTopLeaderboard')
+      .mockResolvedValue([]);
+
+    const { unmount } = render(<App />);
+
+    // Wait for IDLE state
+    await waitFor(() => {
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Verify empty state message
+    await waitFor(() => {
+      expect(screen.getByText('Be the first to set a score!')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    expect(screen.getByText('Complete a quiz to appear on the leaderboard')).toBeInTheDocument();
+
+    // Clean up
+    fetchLeaderboardMock.mockRestore();
+    unmount();
+  }, 20000); // 20 second timeout
+
+  /**
+   * Test: Leaderboard displays top 5 entries only
+   * Validates: Requirements 1.2
+   * 
+   * This test verifies that the leaderboard correctly limits display to top 5 entries.
+   */
+  it('should display maximum of 5 leaderboard entries', async () => {
+    // Mock leaderboard with exactly 5 entries
+    const mockLeaderboard: LeaderboardEntry[] = [
+      { id: 1, username: 'Player1', score: 100, created_at: '2024-12-09T10:00:00Z' },
+      { id: 2, username: 'Player2', score: 90, created_at: '2024-12-09T09:00:00Z' },
+      { id: 3, username: 'Player3', score: 80, created_at: '2024-12-09T08:00:00Z' },
+      { id: 4, username: 'Player4', score: 70, created_at: '2024-12-09T07:00:00Z' },
+      { id: 5, username: 'Player5', score: 60, created_at: '2024-12-09T06:00:00Z' },
+    ];
+
+    const fetchLeaderboardMock = vi.spyOn(supabaseClient, 'fetchTopLeaderboard')
+      .mockResolvedValue(mockLeaderboard);
+
+    const { unmount } = render(<App />);
+
+    // Wait for IDLE state
+    await waitFor(() => {
+      expect(screen.getByText('START MISSION')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Verify all 5 entries are displayed
+    await waitFor(() => {
+      expect(screen.getByText('Player1')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    expect(screen.getByText('Player2')).toBeInTheDocument();
+    expect(screen.getByText('Player3')).toBeInTheDocument();
+    expect(screen.getByText('Player4')).toBeInTheDocument();
+    expect(screen.getByText('Player5')).toBeInTheDocument();
+
+    // Verify ranks are displayed
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByText('4')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
+
+    // Clean up
+    fetchLeaderboardMock.mockRestore();
+    unmount();
+  }, 20000); // 20 second timeout
 });

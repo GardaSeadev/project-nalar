@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { QuestionData } from './types';
+import type { QuestionData, LeaderboardEntry } from './types';
 
 // Replace these with your actual Supabase project credentials
 // Get them from: https://app.supabase.com/project/_/settings/api
@@ -85,4 +85,48 @@ export async function fetchRandomQuestions(count: number = 10): Promise<Question
   // Shuffle and return random subset
   const shuffled = (data || []).sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
+}
+
+/**
+ * Fetch top 5 leaderboard entries ordered by score
+ */
+export async function fetchTopLeaderboard(): Promise<LeaderboardEntry[]> {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+  }
+
+  const { data, error } = await supabase
+    .from('leaderboard')
+    .select('*')
+    .order('score', { ascending: false })
+    .limit(5);
+  
+  if (error) {
+    console.error('Failed to fetch leaderboard:', error);
+    throw error;
+  }
+  
+  return data || [];
+}
+
+/**
+ * Insert a new score to the leaderboard
+ */
+export async function submitScore(
+  username: string, 
+  score: number, 
+  accuracy?: number
+): Promise<void> {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+  }
+
+  const { error } = await supabase
+    .from('leaderboard')
+    .insert([{ username, score, accuracy }]);
+  
+  if (error) {
+    console.error('Failed to submit score:', error);
+    throw error;
+  }
 }

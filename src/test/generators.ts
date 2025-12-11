@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import type { QuestionData, Option } from '../types';
+import type { QuestionData, Option, LeaderboardEntry } from '../types';
 
 /**
  * Generator for valid option IDs (A-E)
@@ -42,3 +42,52 @@ export const questionDataArbitrary: fc.Arbitrary<QuestionData> = fc
     correctId: optionIdArbitrary,
     explanation: fc.string({ minLength: 10, maxLength: 300 }),
   });
+
+/**
+ * Generator for valid leaderboard entries
+ * Ensures:
+ * - Valid ID (positive integer)
+ * - Non-empty username (1-50 characters)
+ * - Non-negative score
+ * - Optional accuracy (0-100)
+ * - Valid ISO timestamp
+ */
+export const leaderboardEntryArbitrary: fc.Arbitrary<LeaderboardEntry> = fc.record({
+  id: fc.integer({ min: 1, max: 10000 }),
+  username: fc.string({ minLength: 1, maxLength: 50 }),
+  score: fc.integer({ min: 0, max: 1000 }),
+  accuracy: fc.option(fc.integer({ min: 0, max: 100 })),
+  created_at: fc.date().map(d => d.toISOString()),
+});
+
+/**
+ * Generator for an array of leaderboard entries (1-5 entries)
+ * Ensures unique IDs for each entry
+ */
+export const leaderboardArrayArbitrary: fc.Arbitrary<LeaderboardEntry[]> = fc
+  .array(leaderboardEntryArbitrary, { minLength: 1, maxLength: 5 })
+  .map((entries) => {
+    // Ensure unique IDs by reassigning them sequentially
+    return entries.map((entry, index) => ({
+      ...entry,
+      id: index + 1,
+    }));
+  });
+
+/**
+ * Generator for valid usernames (non-empty strings, 1-50 characters)
+ * Filters out strings that are only whitespace
+ */
+export const usernameArbitrary: fc.Arbitrary<string> = fc
+  .string({ minLength: 1, maxLength: 50 })
+  .filter(s => s.trim().length > 0);
+
+/**
+ * Generator for scores (non-negative integers)
+ */
+export const scoreArbitrary: fc.Arbitrary<number> = fc.integer({ min: 0, max: 1000 });
+
+/**
+ * Generator for accuracy values (0-100)
+ */
+export const accuracyArbitrary: fc.Arbitrary<number> = fc.integer({ min: 0, max: 100 });

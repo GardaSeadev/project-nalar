@@ -3,6 +3,7 @@ import { Clock, CheckCircle, Trophy, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import type { QuestionArenaProps, RankType } from './types';
+import ScoreSubmissionForm from './components/ScoreSubmissionForm';
 
 /**
  * Calculate rank based on score
@@ -102,7 +103,7 @@ function triggerConfetti(): void {
  * An interactive quiz component that displays a multiple-choice question
  * with immediate feedback, explanations, and a countdown timer.
  */
-export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0, gameState, onQuestionIndexChange, onScoreChange, onStreakChange, finalScore: propFinalScore, finalAccuracy: propFinalAccuracy, renderNextButton }: QuestionArenaProps) {
+export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0, gameState, onQuestionIndexChange, onScoreChange, onStreakChange, finalScore: propFinalScore, finalAccuracy: propFinalAccuracy, renderNextButton, onRefreshLeaderboard }: QuestionArenaProps) {
   // Session management state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
@@ -532,13 +533,29 @@ export function QuestionArena({ questions, onComplete, onTryAgain, highScore = 0
             </motion.div>
           </div>
 
+          {/* Score Submission Form */}
+          {onRefreshLeaderboard && (
+            <motion.div
+              className="mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0 }}
+            >
+              <ScoreSubmissionForm
+                score={displayScore}
+                accuracy={displayAccuracy}
+                onSuccess={onRefreshLeaderboard}
+              />
+            </motion.div>
+          )}
+
           {/* Play Again Button */}
           <motion.button
             onClick={handleTryAgain}
             className="w-full py-4 sm:py-6 bg-indigo-600 text-white rounded-2xl font-bold text-xl sm:text-2xl shadow-lg shadow-indigo-500/50 flex items-center justify-center gap-2 sm:gap-3"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.0 }}
+            transition={{ delay: 1.1 }}
             whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(99, 102, 241, 0.8)" }}
             whileTap={{ scale: 0.95 }}
           >

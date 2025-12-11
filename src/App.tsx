@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
+import { Toaster } from 'react-hot-toast'
 import { QuestionArena } from './QuestionArena'
 import { fetchQuestionsFromSupabase } from './supabaseClient'
 import { loadUserProgress, saveUserProgress, calculateStreak } from './localStorage'
 import { mockQuestions } from './mockData'
 import type { QuestionData, GameState } from './types'
 import BackgroundGradient from './components/BackgroundGradient'
+import Leaderboard from './components/Leaderboard'
 import './App.css'
 
 function App() {
@@ -19,6 +21,9 @@ function App() {
   const [userXP, setUserXP] = useState<number>(0)
   const [highScore, setHighScore] = useState<number>(0)
   const [currentStreak, setCurrentStreak] = useState<number>(0)
+
+  // State for leaderboard refresh trigger
+  const [leaderboardRefreshKey, setLeaderboardRefreshKey] = useState<number>(0)
 
   // State for tracking current question index in PLAYING state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0)
@@ -128,6 +133,11 @@ function App() {
     setGameState('IDLE')
   }
 
+  // Function to trigger leaderboard refresh
+  const refreshLeaderboard = () => {
+    setLeaderboardRefreshKey(prev => prev + 1)
+  }
+
   // Handler for Quit - transition from PLAYING to IDLE
   const handleQuit = (currentScore: number) => {
     // Add current session score to userXP
@@ -159,14 +169,57 @@ function App() {
   // Render Lobby Screen when gameState === 'IDLE'
   if (gameState === 'IDLE') {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <BackgroundGradient />
-        <motion.div 
-          className="max-w-2xl w-full backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-12"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6 }}
-        >
+      <>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            // Default options for all toasts
+            duration: 3000,
+            style: {
+              background: 'rgba(15, 23, 42, 0.9)', // slate-900 with opacity
+              backdropFilter: 'blur(12px)',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              padding: '16px',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+            },
+            // Success toast styling
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#10b981', // green-500
+                secondary: '#fff',
+              },
+              style: {
+                background: 'rgba(16, 185, 129, 0.2)', // green with glassmorphism
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+              },
+            },
+            // Error toast styling
+            error: {
+              duration: 5000,
+              iconTheme: {
+                primary: '#ef4444', // red-500
+                secondary: '#fff',
+              },
+              style: {
+                background: 'rgba(239, 68, 68, 0.2)', // red with glassmorphism
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+              },
+            },
+          }}
+        />
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <BackgroundGradient />
+          <motion.div 
+            className="max-w-2xl w-full backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-12"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+          >
           {/* App Title */}
           <div className="text-center mb-12">
             <h1 className="text-6xl font-bold text-white text-center mb-4">
@@ -195,6 +248,9 @@ function App() {
             </motion.div>
           </div>
 
+          {/* Leaderboard Component */}
+          <Leaderboard key={leaderboardRefreshKey} />
+
           {/* Start Button */}
           <motion.button
             onClick={handleStartQuiz}
@@ -220,15 +276,59 @@ function App() {
             </p>
           )}
         </motion.div>
-      </div>
+        </div>
+      </>
     )
   }
 
   // Render Quiz Arena when gameState === 'PLAYING'
   if (gameState === 'PLAYING') {
     return (
-      <div className="h-dvh flex flex-col relative overflow-hidden">
-        <BackgroundGradient />
+      <>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            // Default options for all toasts
+            duration: 3000,
+            style: {
+              background: 'rgba(15, 23, 42, 0.9)', // slate-900 with opacity
+              backdropFilter: 'blur(12px)',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              padding: '16px',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+            },
+            // Success toast styling
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#10b981', // green-500
+                secondary: '#fff',
+              },
+              style: {
+                background: 'rgba(16, 185, 129, 0.2)', // green with glassmorphism
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+              },
+            },
+            // Error toast styling
+            error: {
+              duration: 5000,
+              iconTheme: {
+                primary: '#ef4444', // red-500
+                secondary: '#fff',
+              },
+              style: {
+                background: 'rgba(239, 68, 68, 0.2)', // red with glassmorphism
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+              },
+            },
+          }}
+        />
+        <div className="h-dvh flex flex-col relative overflow-hidden">
+          <BackgroundGradient />
         
         {/* SECTION 1: Fixed Header (Top) - flex-none */}
         <motion.div 
@@ -313,15 +413,59 @@ function App() {
             </motion.button>
           </div>
         </div>
-      </div>
+        </div>
+      </>
     )
   }
 
   // Render Summary Screen when gameState === 'FINISHED'
   if (gameState === 'FINISHED') {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <BackgroundGradient />
+      <>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            // Default options for all toasts
+            duration: 3000,
+            style: {
+              background: 'rgba(15, 23, 42, 0.9)', // slate-900 with opacity
+              backdropFilter: 'blur(12px)',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              padding: '16px',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+            },
+            // Success toast styling
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#10b981', // green-500
+                secondary: '#fff',
+              },
+              style: {
+                background: 'rgba(16, 185, 129, 0.2)', // green with glassmorphism
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+              },
+            },
+            // Error toast styling
+            error: {
+              duration: 5000,
+              iconTheme: {
+                primary: '#ef4444', // red-500
+                secondary: '#fff',
+              },
+              style: {
+                background: 'rgba(239, 68, 68, 0.2)', // red with glassmorphism
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+              },
+            },
+          }}
+        />
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <BackgroundGradient />
         
         {/* Summary Card will be rendered here by QuestionArena */}
         <QuestionArena 
@@ -332,8 +476,10 @@ function App() {
           gameState={gameState}
           finalScore={finalScore}
           finalAccuracy={finalAccuracy}
+          onRefreshLeaderboard={refreshLeaderboard}
         />
-      </div>
+        </div>
+      </>
     )
   }
 

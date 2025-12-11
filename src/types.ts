@@ -44,6 +44,7 @@ export interface QuestionArenaProps {
   finalScore?: number;  // Optional final score to display in FINISHED state
   finalAccuracy?: number;  // Optional final accuracy to display in FINISHED state
   renderNextButton?: (handleNext: () => void, isAnswered: boolean) => React.ReactNode;  // Optional render prop for Next button
+  onRefreshLeaderboard?: () => void;  // Optional callback to refresh leaderboard after score submission
 }
 
 /**
@@ -54,4 +55,15 @@ export interface UserProgress {
   highScore: number;        // Best single session score
   currentStreak: number;    // Consecutive days played
   lastPlayedDate: string;   // ISO date string (e.g., "2024-12-08")
+}
+
+/**
+ * Represents a leaderboard entry
+ */
+export interface LeaderboardEntry {
+  id: number;
+  username: string;
+  score: number;
+  accuracy?: number;  // Optional for tie-breaking
+  created_at: string;
 }
