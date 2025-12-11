@@ -37,8 +37,8 @@ export async function fetchQuestions(): Promise<QuestionData[]> {
 }
 
 /**
- * Fetch a random subset of questions from Supabase
- * Fetches all questions and returns a random subset of 10
+ * Fetch questions from Supabase in sequential order
+ * Fetches the first 10 questions ordered by ID
  */
 export async function fetchQuestionsFromSupabase(): Promise<QuestionData[]> {
   if (!supabase) {
@@ -46,18 +46,18 @@ export async function fetchQuestionsFromSupabase(): Promise<QuestionData[]> {
   }
 
   try {
-    // Fetch all questions first
+    // Fetch first 10 questions ordered by ID
     const { data, error } = await supabase
       .from('questions')
-      .select('*');
+      .select('*')
+      .order('id', { ascending: true })
+      .limit(10);
 
     if (error) {
       throw error;
     }
 
-    // Shuffle and return random subset of 10
-    const shuffled = (data || []).sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 10);
+    return data || [];
   } catch (error) {
     console.error('Error fetching questions from Supabase:', error);
     throw error;
